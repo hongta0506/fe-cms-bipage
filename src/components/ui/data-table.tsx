@@ -4,16 +4,25 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
+  type ColumnFiltersState,
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { Button } from "./button";
 import { Input } from "./input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 import {
   Table,
   TableBody,
@@ -22,6 +31,13 @@ import {
   TableHeader,
   TableRow,
 } from "./table";
+
+interface FilterOption {
+  key: string;
+  label: string;
+  options: { label: string; value: string }[];
+  placeholder?: string;
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,6 +48,7 @@ interface DataTableProps<TData, TValue> {
   pageSize?: number;
   onRowClick?: (row: TData) => void;
   total?: number;
+  filters?: FilterOption[];
 }
 
 export function DataTable<TData, TValue>({
@@ -43,16 +60,26 @@ export function DataTable<TData, TValue>({
   pageSize = 10,
   onRowClick,
   total,
+  filters = [],
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [search, setSearch] = useState("");
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
 
-  const filteredData = searchKey
+  // Apply client-side search
+  const searchedData = searchKey
     ? data.filter((row) => {
         const value = (row as Record<string, unknown>)[searchKey];
         return String(value).toLowerCase().includes(search.toLowerCase());
       })
     : data;
+
+  // Apply column filters
+  const filteredData = filters.reduce((acc, filter) => {
+    const val = filterValues[filter.key];
+    if (!val || val === "all") return acc;
+    return acc.filter((row) => String((row as Record<string, unknown>)[filter.key]) === val);
+  }, searchedData);
 
   const table = useReactTable({
     data: filteredData,
@@ -64,6 +91,8 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     initialState: { pagination: { pageSize } },
   });
+
+  const activeFilters = Object.entries(filterValues).filter(([, v]) => v && v !== "all");
 
   if (isLoading) {
     return (
@@ -98,14 +127,49 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {searchKey && (
-        <Input
-          placeholder={searchPlaceholder}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-sm"
-        />
-      )}
+      {/* Search + Filters row */}
+      <div className="flex flex-wrap items-center gap-3">
+        {searchKey && (
+          <Input
+            placeholder={searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="max-w-sm"
+          />
+        )}
+        {filters.map((filter) => (
+          <Select
+            key={filter.key}
+            value={filterValues[filter.key] ?? "all"}
+            onValueChange={(v) =>
+              setFilterValues((prev) => ({ ...prev, [filter.key]: v }))
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={filter.placeholder ?? filter.label} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All {filter.label}</SelectItem>
+              {filter.options.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ))}
+        {activeFilters.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setFilterValues({})}
+          >
+            <X className="h-3 w-3 mr-1" />
+            Clear filters
+          </Button>
+        )}
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -151,7 +215,7 @@ export function DataTable<TData, TValue>({
       </div>
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {total ?? table.getFilteredRowModel().rows.length} result(s)
+          {total ?? filteredData.length} result(s)
           {total && total > data.length ? ` (${data.length} loaded)` : ""}
         </p>
         <div className="flex items-center gap-2">

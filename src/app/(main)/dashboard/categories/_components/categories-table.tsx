@@ -58,7 +58,18 @@ export function CategoriesTable() {
 
   return (
     <>
-      <DataTable columns={columns} data={categories} isLoading={isLoading} searchKey="name" searchPlaceholder="Search categories..." total={total} />
+      <DataTable columns={columns} data={categories} isLoading={isLoading} searchKey="name" searchPlaceholder="Search categories..." total={total}
+        filters={[
+          {
+            key: "parent_id",
+            label: "Parent",
+            placeholder: "All categories",
+            options: categories
+              .filter((c) => !c.parent_id)
+              .map((c) => ({ label: c.name, value: String(c.id) })),
+          },
+        ]}
+      />
       {editCategory && <CategoryFormDialog open={!!editCategory} onOpenChange={(o) => !o && setEditCategory(null)} category={editCategory} categories={categories} />}
       {deleteCategory && (
         <CategoryDeleteDialog

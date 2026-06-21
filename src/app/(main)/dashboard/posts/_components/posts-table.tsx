@@ -88,6 +88,18 @@ export function PostsTable() {
         searchKey="title"
         searchPlaceholder="Search posts..."
         total={total}
+        filters={[
+          {
+            key: "status",
+            label: "Status",
+            placeholder: "All status",
+            options: [
+              { label: "Draft", value: "draft" },
+              { label: "Published", value: "published" },
+              { label: "Scheduled", value: "scheduled" },
+            ],
+          },
+        ]}
       />
       {editPost && (
         <PostFormDialog
