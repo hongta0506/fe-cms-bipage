@@ -64,17 +64,18 @@ Whenever a command or task is given, you MUST strictly follow this workflow:
 3. **User Approval Stage:** Present the written task doc/sprint plan to the user in the chat interface. **DO NOT start coding or modifying files** until the user reviews and explicitly confirms/approves the plan (e.g., "Ok làm đi").
 4. **Execution & Update:** Execute the code changes sequentially as planned. Once verified, update the task status in the documentation to completed.
 
-## 6. Git Workflow (CRITICAL)
+## 6. Git Workflow (CRITICAL — NEVER SKIP)
 **Always follow this exact order for every sprint/task:**
-1. **Pull latest from main:** `git pull origin main` (or `fe-cms main`) before starting work.
-2. **Implement changes** following sprint plan.
-3. **TypeScript check:** `npx tsc --noEmit` — must pass.
-4. **Build check:** `npx next build` — must pass.
-5. **Commit:** `git add -A && git commit --no-verify -m "..."`.
-6. **Push:** `git push fe-cms main --no-verify`.
-7. **Create PR** (if asked): `gh pr create ...`.
+1. **Pull latest from main:** `git pull fe-cms main` before starting work.
+2. **Create a branch:** `git checkout -b <type>/<description>` (e.g., `fix/theme-boot-warning`, `feat/domains-crud`).
+3. **Implement changes** following sprint plan.
+4. **TypeScript check:** `npx tsc --noEmit` — must pass.
+5. **Build check:** `npx next build` — must pass.
+6. **Commit:** `git add -A && git commit --no-verify -m "..."`.
+7. **Push branch:** `git push fe-cms <branch-name> --no-verify`.
+8. **Create PR:** `gh pr create ...`.
 
-**Never skip step 1. Always pull before coding.**
+**NEVER push directly to main. Always use a branch + PR.**
 
 ## 🤖 SPECIALIZED ASSISTANT INSTRUCTIONS: BAAS SYSTEM & CONTENT BUILDER
 
