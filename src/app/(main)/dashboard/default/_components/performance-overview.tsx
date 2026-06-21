@@ -1,14 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
-import { useContent } from "@/hooks/use-dashboard";
-import { Skeleton } from "@/components/ui/skeleton";
+
+import { format, startOfDay, subDays } from "date-fns";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { format, subDays, startOfDay } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useContent } from "@/hooks/use-dashboard";
 
 export function PerformanceOverview() {
-  const { data, isLoading } = useContent("posts", { pageSize: 100 });
+  const { data, isLoading } = useContent("posts", { pageSize: 30 });
 
   const chartData = useMemo(() => {
     if (!data?.items) return [];
