@@ -1,19 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Loader2, Plus, LayoutList, Network } from "lucide-react";
+
+import { useRouter } from "next/navigation";
+
+import { LayoutList, Loader2, Network, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useAuthStore } from "@/stores/auth/auth-store";
+import { buildTree, TreeView } from "@/components/ui/tree-view";
 import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
-import { TreeView, buildTree } from "@/components/ui/tree-view";
+import { useAuthStore } from "@/stores/auth/auth-store";
 
 import { CategoriesTable } from "./_components/categories-table";
-import { CategoryFormDialog } from "./_components/category-form";
 import { CategoryDeleteDialog } from "./_components/category-delete-dialog";
-import { Pencil, Trash2 } from "lucide-react";
+import { CategoryFormDialog } from "./_components/category-form";
 
 interface Category {
   id: number;
@@ -34,10 +35,21 @@ export default function CategoriesPage() {
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
 
   const { data, isLoading: dataLoading } = useContent("categories", { pageSize: 500 });
+  const { data: domainsData } = useContent("domains", { pageSize: 100 });
   const deleteMutation = useDeleteContent("categories");
 
   const categories = (data?.items ?? []) as Category[];
-  const treeData = buildTree(categories, "id", "parent_id", "name");
+  const domains = (domainsData?.items ?? []) as { id: number; name: string }[];
+  const domainMap = Object.fromEntries(domains.map((d) => [String(d.id), d.name]));
+  const treeData = buildTree(
+    categories.map((c) => ({
+      ...c,
+      name: `${c.name}${domainMap[String(c.domain_id)] ? ` (${domainMap[String(c.domain_id)]})` : ""}`,
+    })),
+    "id",
+    "parent_id",
+    "name",
+  );
 
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
@@ -79,10 +91,20 @@ export default function CategoriesPage() {
           showCount
           renderActions={(node) => (
             <div className="flex gap-1">
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setEditCategory(node as unknown as Category)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => setEditCategory(node as unknown as Category)}
+              >
                 <Pencil className="h-3 w-3" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setDeleteCategory(node as unknown as Category)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => setDeleteCategory(node as unknown as Category)}
+              >
                 <Trash2 className="h-3 w-3 text-destructive" />
               </Button>
             </div>
@@ -92,7 +114,12 @@ export default function CategoriesPage() {
 
       <CategoryFormDialog open={showForm} onOpenChange={setShowForm} />
       {editCategory && (
-        <CategoryFormDialog open={!!editCategory} onOpenChange={(o) => !o && setEditCategory(null)} category={editCategory} categories={categories} />
+        <CategoryFormDialog
+          open={!!editCategory}
+          onOpenChange={(o) => !o && setEditCategory(null)}
+          category={editCategory}
+          categories={categories}
+        />
       )}
       {deleteCategory && (
         <CategoryDeleteDialog
