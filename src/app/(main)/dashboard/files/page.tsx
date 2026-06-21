@@ -5,11 +5,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Trash2, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useContentAll } from "@/hooks/use-dashboard";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useContentAll, useDeleteContent } from "@/hooks/use-dashboard";
 import { useAuthStore } from "@/stores/auth/auth-store";
 
 interface FileItem {
@@ -44,22 +45,6 @@ function formatSize(bytes: number) {
   return `${size.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-const columns: ColumnDef<FileItem>[] = [
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "type", header: "Type" },
-  { accessorKey: "disk", header: "Disk" },
-  {
-    accessorKey: "size",
-    header: "Size",
-    cell: ({ row }) => formatSize(row.getValue("size") as number),
-  },
-  {
-    accessorKey: "created_at",
-    header: "Created",
-    cell: ({ row }) => formatDate(row.getValue("created_at") as string),
-  },
-];
-
 export default function FilesPage() {
   const router = useRouter();
   const isLoading = useAuthStore((s) => s.isLoading);
@@ -67,6 +52,24 @@ export default function FilesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [uploading, setUploading] = useState(false);
+  const [deleteItem, setDeleteItem] = useState<FileItem | null>(null);
+  const deleteMutation = useDeleteContent("file");
+
+  const columns: ColumnDef<FileItem>[] = [
+    { accessorKey: "name", header: "Name" },
+    { accessorKey: "type", header: "Type" },
+    { accessorKey: "disk", header: "Disk" },
+    { accessorKey: "size", header: "Size", cell: ({ row }) => formatSize(row.getValue("size") as number) },
+    { accessorKey: "created_at", header: "Created", cell: ({ row }) => formatDate(row.getValue("created_at") as string) },
+    {
+      id: "actions", header: "Actions",
+      cell: ({ row }) => (
+        <Button variant="ghost" size="sm" onClick={() => setDeleteItem(row.original)}>
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ];
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
@@ -131,6 +134,25 @@ export default function FilesPage() {
         }}
         onPaginationChange={(p) => setPage(p)}
       />
+      {deleteItem && (
+        <Dialog open={!!deleteItem} onOpenChange={(o) => !o && setDeleteItem(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Delete File</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete <strong>{deleteItem.name}</strong>?
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setDeleteItem(null)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => deleteMutation.mutate(deleteItem.id, { onSuccess: () => setDeleteItem(null) })} disabled={deleteMutation.isPending}>
+                {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
