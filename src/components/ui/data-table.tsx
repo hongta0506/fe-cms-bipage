@@ -126,11 +126,13 @@ export function DataTable<TData, TValue>({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {columns.map((col, i) => (
-              <TableHead key={i}>
-                <div className="h-4 bg-muted animate-pulse rounded" />
-              </TableHead>
-            ))}
+            <TableRow>
+              {columns.map((col, i) => (
+                <TableHead key={i}>
+                  <div className="h-4 bg-muted animate-pulse rounded" />
+                </TableHead>
+              ))}
+            </TableRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }).map((_, i) => (

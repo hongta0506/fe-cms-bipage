@@ -1,6 +1,6 @@
 "use client";
 
-import { useContent } from "@/hooks/use-dashboard";
+import { useContentAll } from "@/hooks/use-dashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 export function SubscriberOverview() {
-  const { data: usersData, isLoading } = useContent("user", { pageSize: 10 });
+  const { data: usersData, isLoading } = useContentAll("user", { pageSize: 10 });
 
   if (isLoading) {
     return (

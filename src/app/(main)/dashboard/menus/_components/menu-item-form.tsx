@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateContent, useUpdateContent } from "@/hooks/use-dashboard";
 
@@ -28,9 +29,10 @@ interface MenuItemFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item?: { id: number; label: string; url: string; category_slug?: string; sort_order: number; parent_id: number | null; menu_id: number; status: string };
+  items?: { id: number; label: string; parent_id?: number | null }[];
 }
 
-export function MenuItemFormDialog({ open, onOpenChange, item }: MenuItemFormDialogProps) {
+export function MenuItemFormDialog({ open, onOpenChange, item, items = [] }: MenuItemFormDialogProps) {
   const isEdit = !!item;
   const createMutation = useCreateContent("menu_items");
   const updateMutation = useUpdateContent("menu_items");
@@ -94,8 +96,20 @@ export function MenuItemFormDialog({ open, onOpenChange, item }: MenuItemFormDia
             {errors.sort_order && <p className="text-xs text-destructive">{errors.sort_order.message}</p>}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="parent_id">Parent ID</Label>
-            <input id="parent_id" type="number" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" {...register("parent_id", { valueAsNumber: true })} />
+            <Label>Parent Item</Label>
+            <NativeSelect
+              value={watch("parent_id") ?? ""}
+              onChange={(e) => setValue("parent_id", e.target.value ? Number(e.target.value) : null)}
+            >
+              <option value="">None (root)</option>
+              {items
+                .filter((i) => i.id !== item?.id && !Number(i.parent_id))
+                .map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.label}
+                  </option>
+                ))}
+            </NativeSelect>
             {errors.parent_id && <p className="text-xs text-destructive">{errors.parent_id.message}</p>}
           </div>
           <div className="grid gap-2">

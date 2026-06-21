@@ -9,7 +9,7 @@ import { Loader2, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent } from "@/hooks/use-dashboard";
+import { useContentAll } from "@/hooks/use-dashboard";
 import { useAuthStore } from "@/stores/auth/auth-store";
 
 interface FileItem {
@@ -70,7 +70,7 @@ export default function FilesPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  const { data, isLoading: contentLoading } = useContent("file", { page, pageSize });
+  const { data, isLoading: contentLoading } = useContentAll("file", { page, pageSize });
   const items = (data?.items ?? []) as FileItem[];
   const total = data?.total ?? 0;
 

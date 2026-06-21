@@ -8,7 +8,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
+import { useContentAll, useDeleteContent } from "@/hooks/use-dashboard";
 
 import { RoleDeleteDialog } from "./role-delete-dialog";
 import { RoleFormDialog } from "./role-form";
@@ -26,7 +26,7 @@ export function RolesTable() {
   const [deleteRole, setDeleteRole] = useState<Role | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("role", { page, pageSize });
+  const { data, isLoading } = useContentAll("role", { page, pageSize });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("role");
 

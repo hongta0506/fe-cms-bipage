@@ -7,7 +7,7 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
+import { useContentAll, useDeleteContent } from "@/hooks/use-dashboard";
 
 import { TagDeleteDialog } from "./tag-delete-dialog";
 import { TagFormDialog } from "./tag-form";
@@ -23,7 +23,7 @@ export function TagsTable() {
   const [deleteTag, setDeleteTag] = useState<Tag | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("tags", { page, pageSize });
+  const { data, isLoading } = useContentAll("tags", { page, pageSize });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("tags");
 

@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent } from "@/hooks/use-dashboard";
+import { useContentAll } from "@/hooks/use-dashboard";
 import { useAuthStore } from "@/stores/auth/auth-store";
 
 interface Session {
@@ -65,7 +65,7 @@ export default function SessionsPage() {
   const user = useAuthStore((s) => s.user);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading: contentLoading } = useContent("session", { page, pageSize });
+  const { data, isLoading: contentLoading } = useContentAll("session", { page, pageSize });
   const items = (data?.items ?? []) as Session[];
   const total = data?.total ?? 0;
 

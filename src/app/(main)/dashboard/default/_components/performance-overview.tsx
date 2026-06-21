@@ -7,10 +7,10 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useContent } from "@/hooks/use-dashboard";
+import { useContentAll } from "@/hooks/use-dashboard";
 
 export function PerformanceOverview() {
-  const { data, isLoading } = useContent("posts", { pageSize: 30 });
+  const { data, isLoading } = useContentAll("posts", { pageSize: 30 });
 
   const chartData = useMemo(() => {
     if (!data?.items) return [];

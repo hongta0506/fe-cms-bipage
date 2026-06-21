@@ -97,7 +97,7 @@ export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
         onPaginationChange={(p) => setPage(p)}
       />
       {editItem && (
-        <MenuItemFormDialog open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} item={editItem} />
+        <MenuItemFormDialog open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} item={editItem} items={items} />
       )}
       {deleteItem && (
         <MenuItemDeleteDialog

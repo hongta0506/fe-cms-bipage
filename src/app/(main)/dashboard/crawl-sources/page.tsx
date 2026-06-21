@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent } from "@/hooks/use-dashboard";
+import { useContentAll } from "@/hooks/use-dashboard";
 import { useAuthStore } from "@/stores/auth/auth-store";
 
 interface CrawlSource {
@@ -67,7 +67,7 @@ export default function CrawlSourcesPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  const { data, isLoading: contentLoading } = useContent("crawl_sources", { page, pageSize });
+  const { data, isLoading: contentLoading } = useContentAll("crawl_sources", { page, pageSize });
   if (isLoading || !user) {
     return (
       <div className="flex h-[50vh] items-center justify-center">

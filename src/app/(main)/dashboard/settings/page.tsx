@@ -13,7 +13,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useContent, useUpdateContent } from "@/hooks/use-dashboard";
+import { useContentAll, useUpdateContent } from "@/hooks/use-dashboard";
 import { useAuthStore } from "@/stores/auth/auth-store";
 
 interface Setting {
@@ -33,7 +33,7 @@ export default function SettingsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
-  const { data, isLoading: contentLoading } = useContent("settings", { page, pageSize });
+  const { data, isLoading: contentLoading } = useContentAll("settings", { page, pageSize });
   const items = (data?.items ?? []) as Setting[];
   const total = data?.total ?? 0;
 

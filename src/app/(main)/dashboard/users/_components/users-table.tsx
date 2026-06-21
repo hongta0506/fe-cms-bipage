@@ -8,7 +8,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
+import { useContentAll, useDeleteContent } from "@/hooks/use-dashboard";
 
 import { UserDeleteDialog } from "./user-delete-dialog";
 import { UserFormDialog } from "./user-form";
@@ -28,7 +28,7 @@ export function UsersTable() {
   const [pageSize, setPageSize] = useState(20);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
-  const { data, isLoading } = useContent("user", { page, pageSize });
+  const { data, isLoading } = useContentAll("user", { page, pageSize });
   const deleteMutation = useDeleteContent("user");
 
   const users = (data?.items ?? []) as User[];

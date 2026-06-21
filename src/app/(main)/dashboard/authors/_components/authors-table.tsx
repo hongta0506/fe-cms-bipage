@@ -7,7 +7,7 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
+import { useContentAll, useDeleteContent } from "@/hooks/use-dashboard";
 
 import { AuthorDeleteDialog } from "./author-delete-dialog";
 import { AuthorFormDialog } from "./author-form";
@@ -24,7 +24,7 @@ export function AuthorsTable() {
   const [deleteAuthor, setDeleteAuthor] = useState<Author | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("authors", { page, pageSize });
+  const { data, isLoading } = useContentAll("authors", { page, pageSize });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("authors");
 
