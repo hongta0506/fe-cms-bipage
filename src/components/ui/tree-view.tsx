@@ -32,24 +32,24 @@ function buildTree<T extends Record<string, unknown>>(
   parentKey: string = "parent_id",
   labelKey: string = "name",
 ): TreeNode[] {
-  const map = new Map<string | number, TreeNode>();
+  const map = new Map<string, TreeNode>();
   const roots: TreeNode[] = [];
 
-  // First pass: create nodes
+  // First pass: create nodes (normalize id to string)
   for (const item of items) {
-    const id = item[idKey] as string | number;
+    const id = String(item[idKey]);
     map.set(id, {
-      id,
+      id: item[idKey] as string | number,
       label: String(item[labelKey] ?? ""),
       children: [],
       ...item,
     });
   }
 
-  // Second pass: build tree
+  // Second pass: build tree (normalize parent_id to string)
   for (const item of items) {
-    const id = item[idKey] as string | number;
-    const parentId = item[parentKey] as string | number | null | undefined;
+    const id = String(item[idKey]);
+    const parentId = item[parentKey] != null ? String(item[parentKey]) : null;
     const node = map.get(id)!;
 
     if (parentId && map.has(parentId)) {

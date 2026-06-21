@@ -57,7 +57,7 @@ class ApiClient {
   async getContent(schema: string, options?: { page?: number; pageSize?: number; filter?: string; sort?: string }) {
     const params = new URLSearchParams();
     if (options?.page) params.set("page", String(options.page));
-    if (options?.pageSize) params.set("pageSize", String(options.pageSize));
+    if (options?.pageSize) params.set("limit", String(options.pageSize));
     if (options?.filter) params.set("filter", options.filter);
     if (options?.sort) params.set("sort", options.sort);
     const query = params.toString();
