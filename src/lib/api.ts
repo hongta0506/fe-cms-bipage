@@ -1,7 +1,8 @@
 const API_BASE = process.env.NEXT_PUBLIC_FASTSCHEMA_URL || "https://api.bipage.net";
 
 // Default token for development (avoids login screen on load)
-const DEFAULT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODI2MjA1OTEsInVzZXIiOnsiaWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGZhc3RzY2hlbWEuY29tIiwiYWN0aXZlIjp0cnVlLCJwcm92aWRlciI6ImxvY2FsIiwicm9sZV9pZHMiOlsxXX19.HR_wivFwx75pZuFQjWUgNAqr0ph0IhXrnppVXu3a4is";
+const DEFAULT_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODI2MjA1OTEsInVzZXIiOnsiaWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGZhc3RzY2hlbWEuY29tIiwiYWN0aXZlIjp0cnVlLCJwcm92aWRlciI6ImxvY2FsIiwicm9sZV9pZHMiOlsxXX19.HR_wivFwx75pZuFQjWUgNAqr0ph0IhXrnppVXu3a4is";
 
 interface ApiResponse<T = unknown> {
   data?: T;
@@ -47,21 +48,33 @@ class ApiClient {
   }
 
   async getMe() {
-    return this.request<{ id: number; name: string; email: string; username: string; role: string; avatar?: string }>("/api/auth/me");
+    return this.request<{ id: number; name: string; email: string; username: string; role: string; avatar?: string }>(
+      "/api/auth/me",
+    );
   }
 
   async getSchemas() {
-    return this.request<Array<{ name: string; label: string; icon?: string; fields: Array<{ name: string; type: string }> }>>("/api/schema");
+    return this.request<
+      Array<{ name: string; label: string; icon?: string; fields: Array<{ name: string; type: string }> }>
+    >("/api/schema");
   }
 
-  async getContent(schema: string, options?: { page?: number; pageSize?: number; filter?: string; sort?: string }) {
+  async getContent(
+    schema: string,
+    options?: { page?: number; pageSize?: number; filter?: string; sort?: string; domainId?: number | null },
+  ) {
     const params = new URLSearchParams();
     if (options?.page) params.set("page", String(options.page));
     if (options?.pageSize) params.set("pageSize", String(options.pageSize));
     if (options?.filter) params.set("filter", options.filter);
     if (options?.sort) params.set("sort", options.sort);
+    if (options?.domainId) {
+      params.set("filter", JSON.stringify({ domain_id: options.domainId }));
+    }
     const query = params.toString();
-    return this.request<{ items: unknown[]; total: number; per_page: number; current_page: number; last_page: number }>(`/api/content/${schema}${query ? `?${query}` : ""}`);
+    return this.request<{ items: unknown[]; total: number; per_page: number; current_page: number; last_page: number }>(
+      `/api/content/${schema}${query ? `?${query}` : ""}`,
+    );
   }
 
   async createContent(schema: string, data: Record<string, unknown>) {

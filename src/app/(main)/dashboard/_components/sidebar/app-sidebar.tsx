@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CircleHelp, ClipboardList, Command, Database, File, Search, Settings } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
+import { AutoSchemaSidebar } from "@/components/ui/auto-schema-sidebar";
 import {
   Sidebar,
   SidebarContent,
@@ -19,10 +20,10 @@ import { rootUser } from "@/data/users";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
+import { DomainSwitcher } from "./domain-switcher";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { SidebarSupportCard } from "./sidebar-support-card";
-import { AutoSchemaSidebar } from "@/components/ui/auto-schema-sidebar";
 
 const _data = {
   navSecondary: [
@@ -92,6 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <AutoSchemaSidebar />
       </SidebarContent>
       <SidebarFooter>
+        <DomainSwitcher />
         <SidebarSupportCard />
         <NavUser user={rootUser} />
       </SidebarFooter>

@@ -1,5 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
+import { useDomainStore } from "@/stores/domain/domain-store";
 
 export function useStats() {
   return useQuery({
@@ -9,9 +11,10 @@ export function useStats() {
 }
 
 export function useContent(schema: string, options?: { page?: number; pageSize?: number; sort?: string }) {
+  const domainId = useDomainStore((s) => s.selectedDomainId);
   return useQuery({
-    queryKey: ["content", schema, options],
-    queryFn: () => api.getContent(schema, options),
+    queryKey: ["content", schema, { ...options, domainId }],
+    queryFn: () => api.getContent(schema, { ...options, domainId }),
     enabled: !!schema,
   });
 }
@@ -24,10 +27,11 @@ export function useSchemas() {
 }
 
 export function useContentCount(schema: string) {
+  const domainId = useDomainStore((s) => s.selectedDomainId);
   return useQuery({
-    queryKey: ["content-count", schema],
+    queryKey: ["content-count", schema, { domainId }],
     queryFn: async () => {
-      const res = await api.getContent(schema, { pageSize: 0 });
+      const res = await api.getContent(schema, { pageSize: 0, domainId });
       return res.total;
     },
     enabled: !!schema,
@@ -49,8 +53,7 @@ export function useCreateContent(schema: string) {
 export function useUpdateContent(schema: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) =>
-      api.updateContent(schema, id, data),
+    mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => api.updateContent(schema, id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["content", schema] });
     },
