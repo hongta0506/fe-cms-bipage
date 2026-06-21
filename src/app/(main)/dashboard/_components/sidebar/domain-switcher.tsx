@@ -8,21 +8,25 @@ import { useContent } from "@/hooks/use-dashboard";
 import { useDomainStore } from "@/stores/domain/domain-store";
 
 export function DomainSwitcher() {
-  const { selectedDomainId, setSelectedDomainId } = useDomainStore();
+  const selectedDomainId = useDomainStore((s) => s.selectedDomainId);
+  const setSelectedDomainId = useDomainStore((s) => s.setSelectedDomainId);
   const { data } = useContent("domains", { pageSize: 100 });
   const domains = (data?.items ?? []) as { id: number; name: string }[];
+
+  const currentValue = selectedDomainId != null ? String(selectedDomainId) : "all";
+
+  const handleChange = (v: string) => {
+    setSelectedDomainId(v === "all" ? null : Number(v));
+  };
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Select
-          value={selectedDomainId ? String(selectedDomainId) : "all"}
-          onValueChange={(v) => setSelectedDomainId(v === "all" ? null : Number(v))}
-        >
+        <Select value={currentValue} onValueChange={handleChange}>
           <SelectTrigger className="w-full">
-            <SidebarMenuButton className="gap-2 w-full">
+            <SidebarMenuButton className="gap-2 w-full pointer-events-none">
               <Globe className="h-4 w-4 shrink-0" />
-              <SelectValue placeholder="All Domains" />
+              <SelectValue />
             </SidebarMenuButton>
           </SelectTrigger>
           <SelectContent>
