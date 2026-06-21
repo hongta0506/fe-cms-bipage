@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
 
-import { AuthorFormDialog } from "./author-form";
 import { AuthorDeleteDialog } from "./author-delete-dialog";
+import { AuthorFormDialog } from "./author-form";
 
 interface Author {
   id: number;
@@ -21,7 +22,10 @@ interface Author {
 export function AuthorsTable() {
   const [editAuthor, setEditAuthor] = useState<Author | null>(null);
   const [deleteAuthor, setDeleteAuthor] = useState<Author | null>(null);
-  const { data, isLoading } = useContent("authors", { pageSize: 200 });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const { data, isLoading } = useContent("authors", { page, pageSize });
+  const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("authors");
 
   const authors = (data?.items ?? []) as Author[];
@@ -35,10 +39,24 @@ export function AuthorsTable() {
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditAuthor(row.original); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditAuthor(row.original);
+            }}
+          >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setDeleteAuthor(row.original); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteAuthor(row.original);
+            }}
+          >
             <Trash2 className="h-4 w-4 text-destructive" />
           </Button>
         </div>
@@ -48,8 +66,23 @@ export function AuthorsTable() {
 
   return (
     <>
-      <DataTable columns={columns} data={authors} isLoading={isLoading} searchKey="username" searchPlaceholder="Search authors..." />
-      {editAuthor && <AuthorFormDialog open={!!editAuthor} onOpenChange={(o) => !o && setEditAuthor(null)} author={editAuthor} />}
+      <DataTable
+        columns={columns}
+        data={authors}
+        isLoading={isLoading}
+        searchKey="username"
+        searchPlaceholder="Search authors..."
+        total={total}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPaginationChange={(p) => setPage(p)}
+      />
+      {editAuthor && (
+        <AuthorFormDialog open={!!editAuthor} onOpenChange={(o) => !o && setEditAuthor(null)} author={editAuthor} />
+      )}
       {deleteAuthor && (
         <AuthorDeleteDialog
           open={!!deleteAuthor}

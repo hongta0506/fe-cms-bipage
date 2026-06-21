@@ -26,6 +26,15 @@ export function useSchemas() {
   });
 }
 
+/** Fetch content WITHOUT domain filter — use for reference data (authors, domains, categories). */
+export function useContentAll(schema: string, options?: { page?: number; pageSize?: number; sort?: string }) {
+  return useQuery({
+    queryKey: ["content-all", schema, options],
+    queryFn: () => api.getContent(schema, options),
+    enabled: !!schema,
+  });
+}
+
 export function useContentCount(schema: string) {
   const domainId = useDomainStore((s) => s.selectedDomainId);
   return useQuery({

@@ -89,6 +89,15 @@ function isRelationField(f: SchemaField) {
   return !!f.relation || f.type === "relation" || f.type === "has_one" || f.type === "has_many";
 }
 
+/** Extract the ID from a value that may be a nested object from the API. */
+function extractId(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return Number(value) || null;
+  if (typeof value === "object" && "id" in value) return (value as { id: number }).id;
+  return null;
+}
+
 function isEnumField(f: SchemaField) {
   return !!f.enum && f.enum.length > 0;
 }
@@ -127,6 +136,49 @@ function renderCellValue(value: unknown, field: SchemaField): React.ReactNode {
   return <span>{str}</span>;
 }
 
+/* ---------- Relation data hook ---------- */
+
+function useRelationOptions(schemaName: string) {
+  const { data } = useContent(schemaName, { pageSize: 200 });
+  return useMemo(() => {
+    if (!data?.items) return [] as { id: number; name: string }[];
+    return (data.items as Record<string, unknown>[]).map((item) => ({
+      id: item.id as number,
+      name: (item.name ?? item.title ?? String(item.id)) as string,
+    }));
+  }, [data]);
+}
+
+/* ---------- Relation Select ---------- */
+
+function RelationSelect({
+  schemaName,
+  value,
+  onChange,
+  placeholder,
+}: {
+  schemaName: string;
+  value: number | null;
+  onChange: (id: number | null) => void;
+  placeholder?: string;
+}) {
+  const options = useRelationOptions(schemaName);
+
+  return (
+    <NativeSelect
+      value={value != null ? String(value) : ""}
+      onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
+    >
+      <option value="">{placeholder ?? "None"}</option>
+      {options.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.name}
+        </option>
+      ))}
+    </NativeSelect>
+  );
+}
+
 /* ---------- Dynamic Form ---------- */
 
 function DynamicForm({
@@ -153,7 +205,18 @@ function DynamicForm({
     const initial: Record<string, unknown> = {};
     formFields.forEach((f) => {
       if (item) {
-        initial[f.name] = item[f.name] ?? (isBooleanField(f) ? false : isNumberField(f) ? 0 : "");
+        if (isRelationField(f)) {
+          // API may return relation as nested object under various keys:
+          // - item["category_id"] = 5
+          // - item["category"] = { id: 5, name: "..." }
+          // - item["category"] = 5
+          const raw = item[f.name]
+            ?? item[f.name.replace(/_id$/, "")]
+            ?? item[f.name.replace(/_id$/, "")];
+          initial[f.name] = extractId(raw) ?? (f.default_value as number | null ?? null);
+        } else {
+          initial[f.name] = item[f.name] ?? (isBooleanField(f) ? false : isNumberField(f) ? 0 : "");
+        }
       } else {
         initial[f.name] = f.default_value ?? (isBooleanField(f) ? false : isNumberField(f) ? 0 : "");
       }
@@ -185,6 +248,12 @@ function DynamicForm({
               />
               <span className="text-sm text-muted-foreground">{formData[f.name] ? "Active" : "Inactive"}</span>
             </div>
+          ) : isRelationField(f) && f.relation ? (
+            <RelationSelect
+              schemaName={f.relation.schema}
+              value={extractId(formData[f.name])}
+              onChange={(id) => setFormData({ ...formData, [f.name]: id })}
+            />
           ) : isEnumField(f) ? (
             <NativeSelect
               value={String(formData[f.name] ?? "")}
@@ -231,8 +300,10 @@ export function DynamicSchemaPage({ schema }: { schema: SchemaDef }) {
   const [editItem, setEditItem] = useState<Record<string, unknown> | null>(null);
   const [deleteItem, setDeleteItem] = useState<Record<string, unknown> | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const { data, isLoading } = useContent(schema.name);
+  const { data, isLoading } = useContent(schema.name, { page, pageSize });
   const deleteMutation = useDeleteContent(schema.name);
 
   const items = useMemo(() => (data?.items ?? []) as Record<string, unknown>[], [data]);
@@ -293,8 +364,11 @@ export function DynamicSchemaPage({ schema }: { schema: SchemaDef }) {
         data={items}
         isLoading={isLoading}
         searchKey={searchKey}
-        searchPlaceholder={`Search ${schema.label.toLowerCase()}...`}
+        searchPlaceholder={`Tìm ${schema.label.toLowerCase()}...`}
         total={data?.total ?? 0}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+        onPaginationChange={(p) => setPage(p)}
       />
 
       {/* Create dialog */}

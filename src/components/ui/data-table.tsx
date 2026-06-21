@@ -36,6 +36,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
+import { NativeSelect } from "./native-select";
 
 interface FilterOption {
   key: string;
@@ -51,8 +52,11 @@ interface DataTableProps<TData, TValue> {
   searchKey?: string;
   searchPlaceholder?: string;
   pageSize?: number;
+  onPageSizeChange?: (pageSize: number) => void;
   onRowClick?: (row: TData) => void;
   total?: number;
+  pageCount?: number;
+  onPaginationChange?: (page: number, pageSize: number) => void;
   filters?: FilterOption[];
 }
 
@@ -61,16 +65,20 @@ export function DataTable<TData, TValue>({
   data,
   isLoading,
   searchKey,
-  searchPlaceholder = "Search...",
-  pageSize = 10,
+  searchPlaceholder = "Tìm kiếm...",
+  pageSize: initialPageSize = 10,
+  onPageSizeChange,
   onRowClick,
   total,
+  onPaginationChange,
   filters = [],
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [search, setSearch] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string>>({});
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: initialPageSize });
+  const isServerPaginated = total !== undefined && total !== null;
 
   const searchedData =
     searchKey && search
@@ -87,15 +95,28 @@ export function DataTable<TData, TValue>({
   }, searchedData);
 
   const table = useReactTable({
-    data: filteredData,
+    data: isServerPaginated ? searchedData : filteredData,
     columns,
-    state: { sorting, columnVisibility },
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize } },
+    ...(isServerPaginated
+      ? {
+          manualPagination: true,
+          pageCount: Math.ceil(total / pagination.pageSize),
+          state: { sorting, columnVisibility, pagination },
+          onPaginationChange: (updater) => {
+            const newPagination = typeof updater === "function" ? updater(pagination) : updater;
+            setPagination(newPagination);
+            onPaginationChange?.(newPagination.pageIndex + 1, newPagination.pageSize);
+          },
+        }
+      : {
+          getPaginationRowModel: getPaginationRowModel(),
+          state: { sorting, columnVisibility },
+          initialState: { pagination: { pageSize: initialPageSize } },
+        }),
   });
 
   const activeFilters = Object.entries(filterValues).filter(([, v]) => v && v !== "all");
@@ -160,7 +181,7 @@ export function DataTable<TData, TValue>({
         {activeFilters.length > 0 && (
           <Button variant="ghost" size="sm" onClick={() => setFilterValues({})}>
             <X className="h-3 w-3 mr-1" />
-            Clear filters
+            Xoá bộ lọc
           </Button>
         )}
         <DropdownMenu>
@@ -247,10 +268,23 @@ export function DataTable<TData, TValue>({
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {total ?? filteredData.length} result(s)
-          {total && total > data.length ? ` (${data.length} loaded)` : ""}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            {total ?? filteredData.length} kết quả
+          </p>
+          <NativeSelect
+            value={String(pagination.pageSize)}
+            onChange={(e) => {
+              const size = Number(e.target.value);
+              setPagination({ pageIndex: 0, pageSize: size });
+              onPageSizeChange?.(size);
+            }}
+          >
+            {[10, 20, 50, 100].map((size) => (
+              <option key={size} value={size}>{size} / trang</option>
+            ))}
+          </NativeSelect>
+        </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -258,7 +292,7 @@ export function DataTable<TData, TValue>({
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
-            First
+            Đầu
           </Button>
           <Button
             variant="outline"
@@ -285,7 +319,7 @@ export function DataTable<TData, TValue>({
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >
-            Last
+            Cuối
           </Button>
         </div>
       </div>

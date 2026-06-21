@@ -23,7 +23,7 @@ class ApiClient {
     };
 
     if (this.token) {
-      headers["Authorization"] = `Bearer ${this.token}`;
+      headers.Authorization = `Bearer ${this.token}`;
     }
 
     const res = await fetch(`${API_BASE}${path}`, {
@@ -64,8 +64,8 @@ class ApiClient {
     options?: { page?: number; pageSize?: number; filter?: string; sort?: string; domainId?: number | null },
   ) {
     const params = new URLSearchParams();
-    if (options?.page) params.set("page", String(options.page));
-    if (options?.pageSize) params.set("pageSize", String(options.pageSize));
+    if (options?.page != null && options.page > 0) params.set("page", String(options.page));
+    if (options?.pageSize != null && options.pageSize > 0) params.set("limit", String(options.pageSize));
     if (options?.filter) params.set("filter", options.filter);
     if (options?.sort) params.set("sort", options.sort);
     if (options?.domainId) {

@@ -1,13 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
-import { useAuthStore } from "@/stores/auth/auth-store";
-import { useContent } from "@/hooks/use-dashboard";
-import { DataTable } from "@/components/ui/data-table";
+
 import { Badge } from "@/components/ui/badge";
-import { type ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
+import { useContent } from "@/hooks/use-dashboard";
+import { useAuthStore } from "@/stores/auth/auth-store";
 
 interface ContactSubmission {
   id: number;
@@ -38,11 +41,7 @@ const columns: ColumnDef<ContactSubmission>[] = [
     header: "Message",
     cell: ({ row }) => {
       const message = row.getValue("message") as string;
-      return (
-        <span title={message}>
-          {message?.length > 60 ? message.slice(0, 60) + "..." : message}
-        </span>
-      );
+      return <span title={message}>{message?.length > 60 ? `${message.slice(0, 60)}...` : message}</span>;
     },
   },
   {
@@ -50,7 +49,14 @@ const columns: ColumnDef<ContactSubmission>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
-      const variant = status === "active" ? "default" : status === "pending" ? "secondary" : status === "spam" ? "destructive" : "outline";
+      const variant =
+        status === "active"
+          ? "default"
+          : status === "pending"
+            ? "secondary"
+            : status === "spam"
+              ? "destructive"
+              : "outline";
       return <Badge variant={variant}>{status}</Badge>;
     },
   },
@@ -65,24 +71,39 @@ export default function ContactSubmissionsPage() {
   const router = useRouter();
   const isLoading = useAuthStore((s) => s.isLoading);
   const user = useAuthStore((s) => s.user);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
+  const { data, isLoading: contentLoading } = useContent("contact_submissions", { page, pageSize });
   if (isLoading || !user) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
+      <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
-
-  const { data, isLoading: contentLoading } = useContent("contact_submissions");
   const items = (data?.items ?? []) as ContactSubmission[];
+  const total = data?.total ?? 0;
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <h2 className="text-2xl font-bold">Contact Submissions</h2>
-      <DataTable columns={columns} data={items} isLoading={contentLoading} searchKey="email" searchPlaceholder="Search by email..." />
+      <h2 className="font-bold text-2xl">Contact Submissions</h2>
+      <DataTable
+        columns={columns}
+        data={items}
+        isLoading={contentLoading}
+        searchKey="email"
+        searchPlaceholder="Search by email..."
+        total={total}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPaginationChange={(p) => setPage(p)}
+      />
     </div>
   );
 }

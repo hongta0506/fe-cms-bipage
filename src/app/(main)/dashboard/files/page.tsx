@@ -1,14 +1,16 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { Loader2, Upload } from "lucide-react";
-import { useAuthStore } from "@/stores/auth/auth-store";
-import { useContent } from "@/hooks/use-dashboard";
-import { api } from "@/lib/api";
-import { DataTable } from "@/components/ui/data-table";
+
 import { Button } from "@/components/ui/button";
-import { type ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
+import { useContent } from "@/hooks/use-dashboard";
+import { useAuthStore } from "@/stores/auth/auth-store";
 
 interface FileItem {
   id: number;
@@ -62,21 +64,15 @@ export default function FilesPage() {
   const router = useRouter();
   const isLoading = useAuthStore((s) => s.isLoading);
   const user = useAuthStore((s) => s.user);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [uploading, setUploading] = useState(false);
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  if (isLoading || !user) {
-    return (
-      <div className="flex items-center justify-center h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const { data, isLoading: contentLoading } = useContent("file");
+  const { data, isLoading: contentLoading } = useContent("file", { page, pageSize });
   const items = (data?.items ?? []) as FileItem[];
-
-  const [uploading, setUploading] = useState(false);
+  const total = data?.total ?? 0;
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,10 +95,18 @@ export default function FilesPage() {
     }
   }, []);
 
+  if (isLoading || !user) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Files</h2>
+        <h2 className="font-bold text-2xl">Files</h2>
         <div>
           <input type="file" id="file-upload" className="hidden" onChange={handleUpload} />
           <Button asChild disabled={uploading}>
@@ -113,7 +117,20 @@ export default function FilesPage() {
           </Button>
         </div>
       </div>
-      <DataTable columns={columns} data={items} isLoading={contentLoading} searchKey="name" searchPlaceholder="Search by name..." />
+      <DataTable
+        columns={columns}
+        data={items}
+        isLoading={contentLoading}
+        searchKey="name"
+        searchPlaceholder="Search by name..."
+        total={total}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPaginationChange={(p) => setPage(p)}
+      />
     </div>
   );
 }
