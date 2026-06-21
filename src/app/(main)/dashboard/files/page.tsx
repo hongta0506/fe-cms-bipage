@@ -1,0 +1,119 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
+import { Loader2, Upload } from "lucide-react";
+import { useAuthStore } from "@/stores/auth/auth-store";
+import { useContent } from "@/hooks/use-dashboard";
+import { api } from "@/lib/api";
+import { DataTable } from "@/components/ui/data-table";
+import { Button } from "@/components/ui/button";
+import { type ColumnDef } from "@tanstack/react-table";
+
+interface FileItem {
+  id: number;
+  disk: string;
+  name: string;
+  path: string;
+  type: string;
+  size: number;
+  user_id: number;
+  created_at: string;
+}
+
+function formatDate(dateStr: string) {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatSize(bytes: number) {
+  if (!bytes) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0;
+  let size = bytes;
+  while (size >= 1024 && i < units.length - 1) {
+    size /= 1024;
+    i++;
+  }
+  return `${size.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+const columns: ColumnDef<FileItem>[] = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "type", header: "Type" },
+  { accessorKey: "disk", header: "Disk" },
+  {
+    accessorKey: "size",
+    header: "Size",
+    cell: ({ row }) => formatSize(row.getValue("size") as number),
+  },
+  {
+    accessorKey: "created_at",
+    header: "Created",
+    cell: ({ row }) => formatDate(row.getValue("created_at") as string),
+  },
+];
+
+export default function FilesPage() {
+  const router = useRouter();
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const user = useAuthStore((s) => s.user);
+  useEffect(() => {
+    if (!isLoading && !user) router.push("/auth/v1/login");
+  }, [isLoading, user, router]);
+  if (isLoading || !user) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const { data, isLoading: contentLoading } = useContent("file");
+  const items = (data?.items ?? []) as FileItem[];
+
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = useAuthStore.getState().token;
+      await fetch(`${process.env.NEXT_PUBLIC_FASTSCHEMA_URL || "https://api.bipage.net"}/api/file/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      window.location.reload();
+    } catch (err) {
+      console.error("Upload failed:", err);
+    } finally {
+      setUploading(false);
+    }
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-4 md:gap-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Files</h2>
+        <div>
+          <input type="file" id="file-upload" className="hidden" onChange={handleUpload} />
+          <Button asChild disabled={uploading}>
+            <label htmlFor="file-upload" className="cursor-pointer">
+              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              Upload
+            </label>
+          </Button>
+        </div>
+      </div>
+      <DataTable columns={columns} data={items} isLoading={contentLoading} searchKey="name" searchPlaceholder="Search by name..." />
+    </div>
+  );
+}

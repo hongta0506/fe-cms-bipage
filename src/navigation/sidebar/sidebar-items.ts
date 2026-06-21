@@ -1,24 +1,27 @@
 import {
-  Banknote,
+  BookOpen,
   Calendar,
-  ChartBar,
+  FileText,
   Fingerprint,
-  Forklift,
   Gauge,
-  GraduationCap,
-  Kanban,
+  Globe,
+  ImageIcon,
   LayoutDashboard,
-  ListTodo,
+  Link2,
   Lock,
-  type LucideIcon,
   Mail,
   MessageSquare,
-  ReceiptText,
+  Navigation,
+  Palette,
   Server,
-  ShoppingBag,
+  Settings,
+  Shield,
   SquareArrowUpRight,
+  Tag,
   Users,
+  Webhook,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export type NavBadge = "new" | "soon";
 
@@ -69,59 +72,112 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/default",
         icon: LayoutDashboard,
       },
-      {
-        id: "crm",
-        title: "CRM",
-        url: "/dashboard/crm",
-        icon: ChartBar,
-      },
-      {
-        id: "finance",
-        title: "Finance",
-        url: "/dashboard/finance",
-        icon: Banknote,
-      },
-      {
-        id: "analytics",
-        title: "Analytics",
-        url: "/dashboard/analytics",
-        icon: Gauge,
-      },
-      {
-        id: "productivity",
-        title: "Productivity",
-        url: "/dashboard/productivity",
-        icon: ListTodo,
-      },
-      {
-        id: "ecommerce",
-        title: "E-commerce",
-        url: "/dashboard/ecommerce",
-        icon: ShoppingBag,
-      },
-      {
-        id: "academy",
-        title: "Academy",
-        url: "/dashboard/academy",
-        icon: GraduationCap,
-      },
-      {
-        id: "logistics",
-        title: "Logistics",
-        url: "/dashboard/logistics",
-        icon: Forklift,
-      },
-      {
-        id: "infrastructure",
-        title: "Infrastructure",
-        url: "/dashboard/infrastructure",
-        icon: Server,
-        badge: "new",
-      },
     ],
   },
   {
     id: 2,
+    label: "Content",
+    items: [
+      {
+        id: "posts",
+        title: "Posts",
+        url: "/dashboard/posts",
+        icon: FileText,
+      },
+      {
+        id: "categories",
+        title: "Categories",
+        url: "/dashboard/categories",
+        icon: BookOpen,
+      },
+      {
+        id: "tags",
+        title: "Tags",
+        url: "/dashboard/tags",
+        icon: Tag,
+      },
+      {
+        id: "authors",
+        title: "Authors",
+        url: "/dashboard/authors",
+        icon: Users,
+      },
+      {
+        id: "banners",
+        title: "Banners",
+        url: "/dashboard/banners",
+        icon: ImageIcon,
+      },
+      {
+        id: "blocks",
+        title: "Blocks",
+        url: "/dashboard/blocks",
+        icon: Palette,
+      },
+      {
+        id: "menus",
+        title: "Menus",
+        url: "/dashboard/menus",
+        icon: Navigation,
+      },
+    ],
+  },
+  {
+    id: 3,
+    label: "System",
+    items: [
+      {
+        id: "users",
+        title: "Users",
+        url: "/dashboard/users",
+        icon: Shield,
+      },
+      {
+        id: "roles",
+        title: "Roles",
+        url: "/dashboard/roles",
+        icon: Lock,
+      },
+      {
+        id: "settings",
+        title: "Settings",
+        url: "/dashboard/settings",
+        icon: Settings,
+      },
+      {
+        id: "domains",
+        title: "Domains",
+        url: "/dashboard/domains",
+        icon: Globe,
+      },
+      {
+        id: "files",
+        title: "Files",
+        url: "/dashboard/files",
+        icon: Server,
+      },
+      {
+        id: "sessions",
+        title: "Sessions",
+        url: "/dashboard/sessions",
+        icon: Webhook,
+      },
+      {
+        id: "contact-submissions",
+        title: "Contacts",
+        url: "/dashboard/contact-submissions",
+        icon: Mail,
+      },
+      {
+        id: "crawl-sources",
+        title: "Crawl Sources",
+        url: "/dashboard/crawl-sources",
+        icon: Link2,
+      },
+    ],
+  },
+  {
+    id: 4,
     label: "Pages",
     items: [
       {
@@ -143,61 +199,19 @@ export const sidebarItems: NavGroup[] = [
         icon: Calendar,
       },
       {
-        id: "kanban",
-        title: "Kanban",
-        url: "/dashboard/kanban",
-        icon: Kanban,
-      },
-      {
-        id: "invoice",
-        title: "Invoice",
-        url: "/dashboard/invoice",
-        icon: ReceiptText,
-      },
-      {
-        id: "users",
-        title: "Users",
-        url: "/dashboard/users",
-        icon: Users,
-      },
-      {
-        id: "roles",
-        title: "Roles",
-        url: "/dashboard/roles",
-        icon: Lock,
-      },
-      {
         id: "authentication",
         title: "Authentication",
         icon: Fingerprint,
         subItems: [
-          { id: "auth-login-v1", title: "Login v1", url: "/auth/v1/login", newTab: true },
-          { id: "auth-login-v2", title: "Login v2", url: "/auth/v2/login", newTab: true },
-          { id: "auth-register-v1", title: "Register v1", url: "/auth/v1/register", newTab: true },
-          { id: "auth-register-v2", title: "Register v2", url: "/auth/v2/register", newTab: true },
+          { id: "auth-login-v1", title: "Login", url: "/auth/v1/login", newTab: true },
+          { id: "auth-register-v1", title: "Register", url: "/auth/v1/register", newTab: true },
         ],
       },
     ],
   },
   {
-    id: 3,
+    id: 5,
     label: "Legacy",
-    items: [
-      {
-        id: "legacy-dashboards",
-        title: "Dashboards",
-        subItems: [
-          { id: "legacy-default", title: "Default V1", url: "/dashboard/default-v1" },
-          { id: "legacy-crm", title: "CRM V1", url: "/dashboard/crm-v1" },
-          { id: "legacy-finance", title: "Finance V1", url: "/dashboard/finance-v1" },
-          { id: "legacy-analytics", title: "Analytics V1", url: "/dashboard/analytics-v1" },
-        ],
-      },
-    ],
-  },
-  {
-    id: 4,
-    label: "Misc",
     items: [
       {
         id: "others",
