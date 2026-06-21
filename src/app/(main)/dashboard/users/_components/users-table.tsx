@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
 
-import { UserFormDialog } from "./user-form";
 import { UserDeleteDialog } from "./user-delete-dialog";
+import { UserFormDialog } from "./user-form";
 
 interface User {
   id: number;
@@ -23,12 +24,15 @@ interface User {
 }
 
 export function UsersTable() {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
-  const { data, isLoading } = useContent("user", { pageSize: 200 });
+  const { data, isLoading } = useContent("user", { page, pageSize });
   const deleteMutation = useDeleteContent("user");
 
   const users = (data?.items ?? []) as User[];
+  const total = data?.total ?? 0;
 
   const columns: ColumnDef<User, unknown>[] = [
     { accessorKey: "username", header: "Username" },
@@ -50,10 +54,24 @@ export function UsersTable() {
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditUser(row.original); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditUser(row.original);
+            }}
+          >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setDeleteUser(row.original); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteUser(row.original);
+            }}
+          >
             <Trash2 className="h-4 w-4 text-destructive" />
           </Button>
         </div>
@@ -63,7 +81,20 @@ export function UsersTable() {
 
   return (
     <>
-      <DataTable columns={columns} data={users} isLoading={isLoading} searchKey="username" searchPlaceholder="Search users..." />
+      <DataTable
+        columns={columns}
+        data={users}
+        isLoading={isLoading}
+        searchKey="username"
+        searchPlaceholder="Search users..."
+        total={total}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPaginationChange={(p) => setPage(p)}
+      />
       {editUser && <UserFormDialog open={!!editUser} onOpenChange={(o) => !o && setEditUser(null)} user={editUser} />}
       {deleteUser && (
         <UserDeleteDialog

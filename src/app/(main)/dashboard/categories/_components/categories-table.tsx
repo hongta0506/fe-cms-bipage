@@ -7,7 +7,7 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
+import { useContentAll, useDeleteContent } from "@/hooks/use-dashboard";
 
 import { CategoryDeleteDialog } from "./category-delete-dialog";
 import { CategoryFormDialog } from "./category-form";
@@ -22,10 +22,12 @@ interface Category {
 }
 
 export function CategoriesTable() {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
-  const { data, isLoading } = useContent("categories", { pageSize: 200 });
-  const { data: domainsData } = useContent("domains", { pageSize: 100 });
+  const { data, isLoading } = useContentAll("categories", { page, pageSize });
+  const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
   const deleteMutation = useDeleteContent("categories");
 
   const categories = (data?.items ?? []) as Category[];
@@ -41,7 +43,8 @@ export function CategoriesTable() {
       header: "Parent",
       cell: ({ row }) => {
         if (!row.original.parent_id) return <span className="text-muted-foreground">-</span>;
-        const parent = categories.find((c) => c.id === row.original.parent_id);
+        const pid = Number(row.original.parent_id);
+        const parent = categories.find((c) => c.id === pid);
         return parent?.name ?? String(row.original.parent_id);
       },
     },
@@ -87,19 +90,25 @@ export function CategoriesTable() {
         data={categories}
         isLoading={isLoading}
         searchKey="name"
-        searchPlaceholder="Search categories..."
+        searchPlaceholder="Tìm danh mục..."
         total={total}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPaginationChange={(p) => setPage(p)}
         filters={[
           {
             key: "parent_id",
-            label: "Parent",
-            placeholder: "All categories",
+            label: "Danh mục cha",
+            placeholder: "Tất cả danh mục",
             options: categories.filter((c) => !c.parent_id).map((c) => ({ label: c.name, value: String(c.id) })),
           },
           {
             key: "domain_id",
-            label: "Domain",
-            placeholder: "All domains",
+            label: "Tên miền",
+            placeholder: "Tất cả tên miền",
             options: domains.map((d) => ({ label: d.name, value: String(d.id) })),
           },
         ]}
@@ -108,7 +117,7 @@ export function CategoriesTable() {
         <CategoryFormDialog
           open={!!editCategory}
           onOpenChange={(o) => !o && setEditCategory(null)}
-          category={editCategory}
+          category={editCategory as unknown as Record<string, unknown>}
           categories={categories}
         />
       )}

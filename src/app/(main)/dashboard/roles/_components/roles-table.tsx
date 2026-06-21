@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
 
-import { RoleFormDialog } from "./role-form";
 import { RoleDeleteDialog } from "./role-delete-dialog";
+import { RoleFormDialog } from "./role-form";
 
 interface Role {
   id: number;
@@ -23,7 +24,10 @@ interface Role {
 export function RolesTable() {
   const [editRole, setEditRole] = useState<Role | null>(null);
   const [deleteRole, setDeleteRole] = useState<Role | null>(null);
-  const { data, isLoading } = useContent("role", { pageSize: 200 });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const { data, isLoading } = useContent("role", { page, pageSize });
+  const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("role");
 
   const roles = (data?.items ?? []) as Role[];
@@ -35,9 +39,7 @@ export function RolesTable() {
       accessorKey: "root",
       header: "Root",
       cell: ({ row }) => (
-        <Badge variant={row.original.root ? "default" : "secondary"}>
-          {row.original.root ? "Root" : "Normal"}
-        </Badge>
+        <Badge variant={row.original.root ? "default" : "secondary"}>{row.original.root ? "Root" : "Normal"}</Badge>
       ),
     },
     { accessorKey: "created_at", header: "Created At" },
@@ -46,10 +48,24 @@ export function RolesTable() {
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditRole(row.original); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditRole(row.original);
+            }}
+          >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setDeleteRole(row.original); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteRole(row.original);
+            }}
+          >
             <Trash2 className="h-4 w-4 text-destructive" />
           </Button>
         </div>
@@ -59,7 +75,20 @@ export function RolesTable() {
 
   return (
     <>
-      <DataTable columns={columns} data={roles} isLoading={isLoading} searchKey="name" searchPlaceholder="Search roles..." />
+      <DataTable
+        columns={columns}
+        data={roles}
+        isLoading={isLoading}
+        searchKey="name"
+        searchPlaceholder="Search roles..."
+        total={total}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPaginationChange={(p) => setPage(p)}
+      />
       {editRole && <RoleFormDialog open={!!editRole} onOpenChange={(o) => !o && setEditRole(null)} role={editRole} />}
       {deleteRole && (
         <RoleDeleteDialog

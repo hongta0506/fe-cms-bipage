@@ -16,7 +16,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { SlugInput } from "@/components/ui/slug-input";
 import { Textarea } from "@/components/ui/textarea";
-import { useContent, useCreateContent, useUpdateContent } from "@/hooks/use-dashboard";
+import { useContentAll, useCreateContent, useUpdateContent } from "@/hooks/use-dashboard";
 
 const postSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -32,32 +32,30 @@ const postSchema = z.object({
 
 type PostFormValues = z.infer<typeof postSchema>;
 
+/** Extract ID from value that may be a nested object or flat number/string. */
+function extractId(v: unknown): number | null {
+  if (v === null || v === undefined) return null;
+  if (typeof v === "number") return v;
+  if (typeof v === "string") return Number(v) || null;
+  if (typeof v === "object" && "id" in v) return (v as { id: number }).id;
+  return null;
+}
+
 interface PostFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  post?: {
-    id: number;
-    title: string;
-    slug: string;
-    content?: string;
-    excerpt?: string;
-    cover_image?: string;
-    status: string;
-    author_id?: number | null;
-    category_id?: number | null;
-    domain_id?: number | null;
-  };
+  post?: Record<string, unknown>;
 }
 
 export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps) {
   const isEdit = !!post;
   const createMutation = useCreateContent("posts");
   const updateMutation = useUpdateContent("posts");
-  const [title, setTitle] = useState(post?.title ?? "");
+  const [title, setTitle] = useState((post?.title as string) ?? "");
 
-  const { data: authorsData } = useContent("authors", { pageSize: 100 });
-  const { data: domainsData } = useContent("domains", { pageSize: 100 });
-  const { data: categoriesData } = useContent("categories", { pageSize: 500 });
+  const { data: authorsData } = useContentAll("authors", { pageSize: 100 });
+  const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
+  const { data: categoriesData } = useContentAll("categories", { pageSize: 500 });
   const authors = (authorsData?.items ?? []) as { id: number; display_name: string }[];
   const domains = (domainsData?.items ?? []) as { id: number; name: string }[];
   const allCategories = (categoriesData?.items ?? []) as { id: number; name: string; domain_id?: string | number }[];
@@ -72,15 +70,15 @@ export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps
   } = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
     defaultValues: {
-      title: post?.title ?? "",
-      slug: post?.slug ?? "",
-      content: post?.content ?? "",
-      excerpt: post?.excerpt ?? "",
-      cover_image: post?.cover_image ?? "",
-      status: (post?.status as "draft" | "published") ?? "draft",
-      author_id: post?.author_id ?? null,
-      category_id: post?.category_id ?? null,
-      domain_id: post?.domain_id ?? null,
+      title: (post?.title as string) ?? "",
+      slug: (post?.slug as string) ?? "",
+      content: (post?.content as string) ?? "",
+      excerpt: (post?.excerpt as string) ?? "",
+      cover_image: (post?.cover_image as string) ?? "",
+      status: post?.status === true || post?.status === "published" ? "published" : "draft",
+      author_id: extractId(post?.author_id ?? (post as Record<string, unknown>)?.author),
+      category_id: extractId(post?.category_id ?? (post as Record<string, unknown>)?.category),
+      domain_id: extractId(post?.domain_id ?? (post as Record<string, unknown>)?.domain),
     },
   });
 
@@ -92,17 +90,17 @@ export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps
   useEffect(() => {
     if (open && post) {
       reset({
-        title: post.title,
-        slug: post.slug,
-        content: post.content ?? "",
-        excerpt: post.excerpt ?? "",
-        cover_image: post.cover_image ?? "",
-        status: (post.status as "draft" | "published") ?? "draft",
-        author_id: post.author_id ?? null,
-        category_id: post.category_id ?? null,
-        domain_id: post.domain_id ?? null,
+        title: (post.title as string) ?? "",
+        slug: (post.slug as string) ?? "",
+        content: (post.content as string) ?? "",
+        excerpt: (post.excerpt as string) ?? "",
+        cover_image: (post.cover_image as string) ?? "",
+        status: post.status === true || post.status === "published" ? "published" : "draft",
+        author_id: extractId(post.author_id ?? post.author),
+        category_id: extractId(post.category_id ?? post.category),
+        domain_id: extractId(post.domain_id ?? post.domain),
       });
-      setTitle(post.title);
+      setTitle((post.title as string) ?? "");
     } else if (open) {
       reset({
         title: "",
@@ -122,12 +120,13 @@ export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps
   const onSubmit = (values: PostFormValues) => {
     const payload = {
       ...values,
+      status: values.status === "published",
       author_id: values.author_id || null,
       category_id: values.category_id || null,
       domain_id: values.domain_id || null,
     };
     if (isEdit) {
-      updateMutation.mutate({ id: post.id, data: payload }, { onSuccess: () => onOpenChange(false) });
+      updateMutation.mutate({ id: post?.id as number, data: payload }, { onSuccess: () => onOpenChange(false) });
     } else {
       createMutation.mutate(payload, { onSuccess: () => onOpenChange(false) });
     }
@@ -139,16 +138,16 @@ export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent style={{ maxWidth: "800px" }} className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Post" : "New Post"}</DialogTitle>
+          <DialogTitle>{post ? "Chỉnh sửa bài viết" : "Bài viết mới"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label>Title</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+            {errors.title && <p className="text-destructive text-sm">{errors.title.message}</p>}
           </div>
 
-          <SlugInput title={title} value={watch("slug")} onChange={(v) => setValue("slug", v)} />
+          <SlugInput title={title} value={watch("slug") as string} onChange={(v) => setValue("slug", v)} />
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">

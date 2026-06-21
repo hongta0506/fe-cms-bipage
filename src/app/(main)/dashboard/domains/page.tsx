@@ -1,13 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
-import { useAuthStore } from "@/stores/auth/auth-store";
-import { useContent } from "@/hooks/use-dashboard";
-import { DataTable } from "@/components/ui/data-table";
+
 import { Badge } from "@/components/ui/badge";
-import { type ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
+import { useContent } from "@/hooks/use-dashboard";
+import { useAuthStore } from "@/stores/auth/auth-store";
 
 interface Domain {
   id: number;
@@ -47,24 +50,40 @@ export default function DomainsPage() {
   const router = useRouter();
   const isLoading = useAuthStore((s) => s.isLoading);
   const user = useAuthStore((s) => s.user);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const { data, isLoading: contentLoading } = useContent("domains", { page, pageSize });
+  const items = (data?.items ?? []) as Domain[];
+  const total = data?.total ?? 0;
+
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
   if (isLoading || !user) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
+      <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  const { data, isLoading: contentLoading } = useContent("domains");
-  const items = (data?.items ?? []) as Domain[];
-
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <h2 className="text-2xl font-bold">Domains</h2>
-      <DataTable columns={columns} data={items} isLoading={contentLoading} searchKey="name" searchPlaceholder="Search by name..." />
+      <h2 className="font-bold text-2xl">Domains</h2>
+      <DataTable
+        columns={columns}
+        data={items}
+        isLoading={contentLoading}
+        searchKey="name"
+        searchPlaceholder="Search by name..."
+        total={total}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPaginationChange={(p) => setPage(p)}
+      />
     </div>
   );
 }

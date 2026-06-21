@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
+import { useContentAll, useDeleteContent } from "@/hooks/use-dashboard";
 
-import { MenuItemFormDialog } from "./menu-item-form";
 import { MenuItemDeleteDialog } from "./menu-item-delete-dialog";
+import { MenuItemFormDialog } from "./menu-item-form";
 
 interface MenuItem {
   id: number;
@@ -27,12 +28,15 @@ interface MenuItemsTableProps {
 }
 
 export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [editItem, setEditItem] = useState<MenuItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<MenuItem | null>(null);
-  const { data, isLoading } = useContent("menu_items", { pageSize: 200 });
+  const { data, isLoading } = useContentAll("menu_items", { page, pageSize });
   const deleteMutation = useDeleteContent("menu_items");
 
   const items = (data?.items ?? []) as MenuItem[];
+  const total = data?.total ?? 0;
 
   const columns: ColumnDef<MenuItem, unknown>[] = [
     { accessorKey: "label", header: "Label" },
@@ -43,9 +47,7 @@ export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge variant={row.original.status === "active" ? "default" : "secondary"}>
-          {row.original.status}
-        </Badge>
+        <Badge variant={row.original.status === "active" ? "default" : "secondary"}>{row.original.status}</Badge>
       ),
     },
     {
@@ -53,10 +55,24 @@ export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditItem(row.original); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditItem(row.original);
+            }}
+          >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setDeleteItem(row.original); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteItem(row.original);
+            }}
+          >
             <Trash2 className="h-4 w-4 text-destructive" />
           </Button>
         </div>
@@ -66,8 +82,23 @@ export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
 
   return (
     <>
-      <DataTable columns={columns} data={items} isLoading={isLoading} searchKey="label" searchPlaceholder="Search menu items..." />
-      {editItem && <MenuItemFormDialog open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} item={editItem} />}
+      <DataTable
+        columns={columns}
+        data={items}
+        isLoading={isLoading}
+        searchKey="label"
+        searchPlaceholder="Search menu items..."
+        total={total}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPaginationChange={(p) => setPage(p)}
+      />
+      {editItem && (
+        <MenuItemFormDialog open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} item={editItem} />
+      )}
       {deleteItem && (
         <MenuItemDeleteDialog
           open={!!deleteItem}

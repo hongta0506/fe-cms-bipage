@@ -1,43 +1,42 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Globe } from "lucide-react";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { useContent } from "@/hooks/use-dashboard";
+import { api } from "@/lib/api";
 import { useDomainStore } from "@/stores/domain/domain-store";
 
 export function DomainSwitcher() {
   const selectedDomainId = useDomainStore((s) => s.selectedDomainId);
   const setSelectedDomainId = useDomainStore((s) => s.setSelectedDomainId);
-  const { data } = useContent("domains", { pageSize: 100 });
+
+  // Direct query — don't use useContent which adds domainId filter
+  const { data } = useQuery({
+    queryKey: ["domains-list"],
+    queryFn: () => api.getContent("domains", { pageSize: 100 }),
+  });
+
   const domains = (data?.items ?? []) as { id: number; name: string }[];
-
-  const currentValue = selectedDomainId != null ? String(selectedDomainId) : "all";
-
-  const handleChange = (v: string) => {
-    setSelectedDomainId(v === "all" ? null : Number(v));
-  };
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Select value={currentValue} onValueChange={handleChange}>
-          <SelectTrigger className="w-full">
-            <SidebarMenuButton className="gap-2 w-full pointer-events-none">
-              <Globe className="h-4 w-4 shrink-0" />
-              <SelectValue />
-            </SidebarMenuButton>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Domains</SelectItem>
+        <SidebarMenuButton className="gap-2">
+          <Globe className="h-4 w-4 shrink-0" />
+          <select
+            value={selectedDomainId != null ? String(selectedDomainId) : ""}
+            onChange={(e) => setSelectedDomainId(e.target.value ? Number(e.target.value) : null)}
+            className="flex-1 cursor-pointer bg-transparent text-sm outline-none"
+          >
+            <option value="">Tất cả tên miền</option>
             {domains.map((d) => (
-              <SelectItem key={d.id} value={String(d.id)}>
+              <option key={d.id} value={d.id}>
                 {d.name}
-              </SelectItem>
+              </option>
             ))}
-          </SelectContent>
-        </Select>
+          </select>
+        </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   );

@@ -9,7 +9,7 @@ import { LayoutList, Loader2, Network, Pencil, Plus, Trash2 } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { buildTree, TreeView } from "@/components/ui/tree-view";
-import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
+import { useContentAll, useDeleteContent } from "@/hooks/use-dashboard";
 import { useAuthStore } from "@/stores/auth/auth-store";
 
 import { CategoriesTable } from "./_components/categories-table";
@@ -34,8 +34,8 @@ export default function CategoriesPage() {
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
 
-  const { data, isLoading: dataLoading } = useContent("categories", { pageSize: 500 });
-  const { data: domainsData } = useContent("domains", { pageSize: 100 });
+  const { data } = useContentAll("categories", { pageSize: 1000 });
+  const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
   const deleteMutation = useDeleteContent("categories");
 
   const categories = (data?.items ?? []) as Category[];
@@ -57,7 +57,7 @@ export default function CategoriesPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
+      <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -66,7 +66,7 @@ export default function CategoriesPage() {
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Categories ({categories.length})</h2>
+        <h2 className="font-bold text-2xl">Categories ({categories.length})</h2>
         <div className="flex items-center gap-3">
           <ToggleGroup type="single" value={view} onValueChange={(v) => v && setView(v as "table" | "tree")}>
             <ToggleGroupItem value="table" aria-label="Table view">
