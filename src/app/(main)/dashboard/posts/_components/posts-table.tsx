@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useContent, useDeleteContent } from "@/hooks/use-dashboard";
 
-import { PostFormDialog } from "./post-form";
 import { PostDeleteDialog } from "./post-delete-dialog";
+import { PostFormDialog } from "./post-form";
 
 interface Post {
   id: number;
@@ -18,6 +19,7 @@ interface Post {
   slug: string;
   status: string;
   author_id?: number;
+  domain_id?: number;
   created_at: string;
 }
 
@@ -25,9 +27,12 @@ export function PostsTable() {
   const [editPost, setEditPost] = useState<Post | null>(null);
   const [deletePost, setDeletePost] = useState<Post | null>(null);
   const { data, isLoading } = useContent("posts", { pageSize: 100 });
+  const { data: domainsData } = useContent("domains", { pageSize: 100 });
   const deleteMutation = useDeleteContent("posts");
 
   const posts = (data?.items ?? []) as Post[];
+  const domains = (domainsData?.items ?? []) as { id: number; name: string }[];
+  const domainMap = Object.fromEntries(domains.map((d) => [String(d.id), d.name]));
   const total = data?.total ?? 0;
 
   const columns: ColumnDef<Post, unknown>[] = [
@@ -39,10 +44,13 @@ export function PostsTable() {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge variant={row.original.status === "published" ? "default" : "secondary"}>
-          {row.original.status}
-        </Badge>
+        <Badge variant={row.original.status === "published" ? "default" : "secondary"}>{row.original.status}</Badge>
       ),
+    },
+    {
+      accessorKey: "domain_id",
+      header: "Domain",
+      cell: ({ row }) => domainMap[String(row.original.domain_id)] ?? "-",
     },
     {
       accessorKey: "created_at",
@@ -88,13 +96,27 @@ export function PostsTable() {
         searchKey="title"
         searchPlaceholder="Search posts..."
         total={total}
+        filters={[
+          {
+            key: "status",
+            label: "Status",
+            placeholder: "All status",
+            options: [
+              { label: "Draft", value: "draft" },
+              { label: "Published", value: "published" },
+              { label: "Scheduled", value: "scheduled" },
+            ],
+          },
+          {
+            key: "domain_id",
+            label: "Domain",
+            placeholder: "All domains",
+            options: domains.map((d) => ({ label: d.name, value: String(d.id) })),
+          },
+        ]}
       />
       {editPost && (
-        <PostFormDialog
-          open={!!editPost}
-          onOpenChange={(open) => !open && setEditPost(null)}
-          post={editPost}
-        />
+        <PostFormDialog open={!!editPost} onOpenChange={(open) => !open && setEditPost(null)} post={editPost} />
       )}
       {deletePost && (
         <PostDeleteDialog
