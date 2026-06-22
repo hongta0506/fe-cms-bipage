@@ -35,6 +35,7 @@ export default function SettingsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const deleteMutation = useDeleteContent("settings");
 
   const { data, isLoading: contentLoading } = useContentAll("settings", { page, pageSize: 500, search });

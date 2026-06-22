@@ -164,16 +164,16 @@ export function DataTable<TData, TValue>({
       <div className="flex flex-wrap items-center gap-3">
         {searchKey && (
           <div className="flex items-center gap-2">
-          <Input
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") triggerSearch(); }}
-            className="max-w-sm"
-          />
-          <Button variant="outline" size="sm" onClick={triggerSearch}>
-            <Search className="h-4 w-4" />
-          </Button>
+            <Input
+              placeholder={searchPlaceholder}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") triggerSearch(); }}
+              className="max-w-sm"
+            />
+            <Button variant="outline" size="sm" onClick={triggerSearch}>
+              <Search className="h-4 w-4" />
+            </Button>
           </div>
         )}
         {filters.map((filter) => (

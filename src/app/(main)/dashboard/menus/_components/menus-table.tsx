@@ -28,6 +28,7 @@ export function MenusTable() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const [editMenu, setEditMenu] = useState<Menu | null>(null);
   const [deleteMenu, setDeleteMenu] = useState<Menu | null>(null);
   const { data, isLoading } = useContentAll("menus", { page, pageSize, search });
