@@ -21,6 +21,7 @@ interface User {
   last_name: string;
   active: boolean;
   created_at: string;
+  roles?: { id: number; name: string }[];
 }
 
 export function UsersTable() {
@@ -47,6 +48,21 @@ export function UsersTable() {
           {row.original.active ? "Active" : "Inactive"}
         </Badge>
       ),
+    },
+    {
+      id: "roles",
+      header: "Roles",
+      cell: ({ row }) => {
+        const roles = row.original.roles ?? [];
+        if (roles.length === 0) return <span className="text-muted-foreground">-</span>;
+        return (
+          <div className="flex flex-wrap gap-1">
+            {roles.map((r) => (
+              <Badge key={r.id} variant="outline">{r.name}</Badge>
+            ))}
+          </div>
+        );
+      },
     },
     { accessorKey: "created_at", header: "Created At" },
     {
