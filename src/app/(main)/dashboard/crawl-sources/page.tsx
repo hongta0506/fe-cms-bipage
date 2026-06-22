@@ -42,7 +42,7 @@ export default function CrawlSourcesPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  const { data, isLoading: contentLoading } = useContentAll("crawl_sources", { page, pageSize, search });
+  const { data, isLoading: contentLoading } = useContentAll("crawl_sources", { page, pageSize, search, searchField: "name" });
   if (isLoading || !user) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -106,7 +106,7 @@ export default function CrawlSourcesPage() {
         isLoading={contentLoading}
         searchKey="name"
         searchPlaceholder="Search by name..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}

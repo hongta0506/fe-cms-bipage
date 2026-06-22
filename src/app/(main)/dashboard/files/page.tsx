@@ -74,7 +74,7 @@ export default function FilesPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  const { data, isLoading: contentLoading } = useContentAll("file", { page, pageSize, search });
+  const { data, isLoading: contentLoading } = useContentAll("file", { page, pageSize, search, searchField: "name" });
   const items = (data?.items ?? []) as FileItem[];
   const total = data?.total ?? 0;
 
@@ -127,7 +127,7 @@ export default function FilesPage() {
         isLoading={contentLoading}
         searchKey="name"
         searchPlaceholder="Search by name..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

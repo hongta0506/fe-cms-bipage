@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -17,6 +17,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { SlugInput } from "@/components/ui/slug-input";
 import { Textarea } from "@/components/ui/textarea";
 import { useContentAll, useCreateContent, useUpdateContent } from "@/hooks/use-dashboard";
+import { api } from "@/lib/api";
 
 const postSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -31,6 +32,14 @@ const postSchema = z.object({
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
+
+function toUniqueSlug(slug: string, existing: Set<string>): string {
+  if (!slug) return slug;
+  if (!existing.has(slug)) return slug;
+  let counter = 1;
+  while (existing.has(`${slug}-${counter}`)) counter++;
+  return `${slug}-${counter}`;
+}
 
 /** Extract ID from value that may be a nested object or flat number/string. */
 function extractId(v: unknown): number | null {
@@ -52,6 +61,16 @@ export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps
   const createMutation = useCreateContent("posts");
   const updateMutation = useUpdateContent("posts");
   const [title, setTitle] = useState((post?.title as string) ?? "");
+  const [existingSlugs, setExistingSlugs] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!open) return;
+    api.getContent("posts", { pageSize: 1000 }).then((res) => {
+      const items = res.items as { slug: string; id: number }[];
+      const currentId = post?.id as number | undefined;
+      setExistingSlugs(new Set(items.filter((item) => item.id !== currentId).map((item) => item.slug)));
+    }).catch(() => setExistingSlugs(new Set()));
+  }, [open, post?.id]);
 
   const { data: authorsData } = useContentAll("authors", { pageSize: 100 });
   const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
@@ -147,7 +166,7 @@ export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps
             {errors.title && <p className="text-destructive text-sm">{errors.title.message}</p>}
           </div>
 
-          <SlugInput title={title} value={watch("slug") as string} onChange={(v) => setValue("slug", v)} />
+          <SlugInput title={title} value={watch("slug") as string} onChange={(v) => setValue("slug", toUniqueSlug(v, existingSlugs))} />
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">

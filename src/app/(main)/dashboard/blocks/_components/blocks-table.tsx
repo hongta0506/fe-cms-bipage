@@ -37,7 +37,7 @@ export function BlocksTable() {
   const [deleteBlock, setDeleteBlock] = useState<Block | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("blocks", { page, pageSize, search });
+  const { data, isLoading } = useContent("blocks", { page, pageSize, search, searchField: "title" });
   const deleteMutation = useDeleteContent("blocks");
 
   const blocks = (data?.items ?? []) as Block[];
@@ -92,7 +92,7 @@ export function BlocksTable() {
         isLoading={isLoading}
         searchKey="title"
         searchPlaceholder="Search blocks..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

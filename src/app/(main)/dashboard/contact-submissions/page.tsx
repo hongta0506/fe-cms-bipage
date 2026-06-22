@@ -46,7 +46,7 @@ export default function ContactSubmissionsPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  const { data, isLoading: contentLoading } = useContentAll("contact_submissions", { page, pageSize, search });
+  const { data, isLoading: contentLoading } = useContentAll("contact_submissions", { page, pageSize, search, searchField: "email" });
 
   if (isLoading || !user) {
     return (
@@ -103,7 +103,7 @@ export default function ContactSubmissionsPage() {
         isLoading={contentLoading}
         searchKey="email"
         searchPlaceholder="Search by email..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         filters={[{ key: "status", label: "Status", options: [{ label: "Active", value: "active" }, { label: "Pending", value: "pending" }, { label: "Spam", value: "spam" }, { label: "Closed", value: "closed" }] }]}
         total={total}
         pageSize={pageSize}

@@ -66,7 +66,7 @@ export default function SessionsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading: contentLoading } = useContentAll("session", { page, pageSize, search });
+  const { data, isLoading: contentLoading } = useContentAll("session", { page, pageSize, search, searchField: "ip_address" });
   const items = (data?.items ?? []) as Session[];
   const total = data?.total ?? 0;
 
@@ -90,7 +90,7 @@ export default function SessionsPage() {
         isLoading={contentLoading}
         searchKey="ip_address"
         searchPlaceholder="Search by IP..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

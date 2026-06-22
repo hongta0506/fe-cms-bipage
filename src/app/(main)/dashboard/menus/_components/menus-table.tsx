@@ -30,7 +30,7 @@ export function MenusTable() {
   const [pageSize, setPageSize] = useState(20);
   const [editMenu, setEditMenu] = useState<Menu | null>(null);
   const [deleteMenu, setDeleteMenu] = useState<Menu | null>(null);
-  const { data, isLoading } = useContentAll("menus", { page, pageSize, search });
+  const { data, isLoading } = useContentAll("menus", { page, pageSize, search, searchField: "label" });
   const deleteMutation = useDeleteContent("menus");
 
   const menus = (data?.items ?? []) as Menu[];
@@ -86,7 +86,7 @@ export function MenusTable() {
         isLoading={isLoading}
         searchKey="label"
         searchPlaceholder="Search menus..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

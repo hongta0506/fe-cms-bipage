@@ -33,7 +33,7 @@ export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
   const [pageSize, setPageSize] = useState(20);
   const [editItem, setEditItem] = useState<MenuItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<MenuItem | null>(null);
-  const { data, isLoading } = useContentAll("menu_items", { page, pageSize, search });
+  const { data, isLoading } = useContentAll("menu_items", { page, pageSize, search, searchField: "label" });
   const deleteMutation = useDeleteContent("menu_items");
 
   const items = (data?.items ?? []) as MenuItem[];
@@ -89,7 +89,7 @@ export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
         isLoading={isLoading}
         searchKey="label"
         searchPlaceholder="Search menu items..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

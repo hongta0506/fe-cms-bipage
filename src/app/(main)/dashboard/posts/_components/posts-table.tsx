@@ -44,7 +44,7 @@ export function PostsTable() {
   const [selectedPosts, setSelectedPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("posts", { page, pageSize, search });
+  const { data, isLoading } = useContent("posts", { page, pageSize, search, searchField: "title" });
   const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
   const { data: categoriesData } = useContentAll("categories", { pageSize: 200 });
   const deleteMutation = useDeleteContent("posts");
@@ -242,7 +242,7 @@ export function PostsTable() {
         isLoading={isLoading}
         searchKey="title"
         searchPlaceholder="Tìm bài viết..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

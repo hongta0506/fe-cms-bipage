@@ -89,13 +89,17 @@ export function DataTable<TData, TValue>({
     if (isServerPaginated) setPagination((p) => ({ ...p, pageIndex: 0 }));
   };
 
+  // Server-side: API handles search via $like filter, skip client-side filtering
+  // Client-side: filter locally by searchKey
   const searchedData =
-    searchKey && appliedSearch
-      ? data.filter((row) => {
-          const value = (row as Record<string, unknown>)[searchKey];
-          return String(value ?? "").toLowerCase().includes(appliedSearch.toLowerCase());
-        })
-      : data;
+    isServerPaginated
+      ? data
+      : searchKey && appliedSearch
+        ? data.filter((row) => {
+            const value = (row as Record<string, unknown>)[searchKey];
+            return String(value ?? "").toLowerCase().includes(appliedSearch.toLowerCase());
+          })
+        : data;
 
   const filteredData = filters.reduce((acc, filter) => {
     const val = filterValues[filter.key];
