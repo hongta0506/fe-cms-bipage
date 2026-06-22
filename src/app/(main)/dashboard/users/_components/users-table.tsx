@@ -25,11 +25,12 @@ interface User {
 }
 
 export function UsersTable() {
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
-  const { data, isLoading } = useContentAll("user", { page, pageSize });
+  const { data, isLoading } = useContentAll("user", { page, pageSize, search });
   const deleteMutation = useDeleteContent("user");
 
   const users = (data?.items ?? []) as User[];
@@ -103,6 +104,7 @@ export function UsersTable() {
         isLoading={isLoading}
         searchKey="username"
         searchPlaceholder="Search users..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

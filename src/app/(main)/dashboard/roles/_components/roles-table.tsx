@@ -22,11 +22,12 @@ interface Role {
 }
 
 export function RolesTable() {
+  const [search, setSearch] = useState("");
   const [editRole, setEditRole] = useState<Role | null>(null);
   const [deleteRole, setDeleteRole] = useState<Role | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContentAll("role", { page, pageSize });
+  const { data, isLoading } = useContentAll("role", { page, pageSize, search });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("role");
 
@@ -81,6 +82,7 @@ export function RolesTable() {
         isLoading={isLoading}
         searchKey="name"
         searchPlaceholder="Search roles..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

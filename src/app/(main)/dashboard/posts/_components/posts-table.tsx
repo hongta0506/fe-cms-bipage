@@ -38,12 +38,13 @@ interface Post {
 }
 
 export function PostsTable() {
+  const [search, setSearch] = useState("");
   const [editPost, setEditPost] = useState<Post | null>(null);
   const [deletePost, setDeletePost] = useState<Post | null>(null);
   const [selectedPosts, setSelectedPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("posts", { page, pageSize });
+  const { data, isLoading } = useContent("posts", { page, pageSize, search });
   const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
   const { data: categoriesData } = useContentAll("categories", { pageSize: 200 });
   const deleteMutation = useDeleteContent("posts");
@@ -241,6 +242,7 @@ export function PostsTable() {
         isLoading={isLoading}
         searchKey="title"
         searchPlaceholder="Tìm bài viết..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

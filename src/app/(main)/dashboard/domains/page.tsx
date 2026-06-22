@@ -27,12 +27,13 @@ export default function DomainsPage() {
   const router = useRouter();
   const isLoading = useAuthStore((s) => s.isLoading);
   const user = useAuthStore((s) => s.user);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [createOpen, setCreateOpen] = useState(false);
   const [editItem, setEditItem] = useState<Domain | null>(null);
   const [deleteItem, setDeleteItem] = useState<Domain | null>(null);
-  const { data, isLoading: contentLoading } = useContentAll("domains", { page, pageSize });
+  const { data, isLoading: contentLoading } = useContentAll("domains", { page, pageSize, search });
   const items = (data?.items ?? []) as Domain[];
   const total = data?.total ?? 0;
 
@@ -99,6 +100,7 @@ export default function DomainsPage() {
         isLoading={contentLoading}
         searchKey="name"
         searchPlaceholder="Search by name..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}

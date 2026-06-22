@@ -63,9 +63,10 @@ export default function SessionsPage() {
   const router = useRouter();
   const isLoading = useAuthStore((s) => s.isLoading);
   const user = useAuthStore((s) => s.user);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading: contentLoading } = useContentAll("session", { page, pageSize });
+  const { data, isLoading: contentLoading } = useContentAll("session", { page, pageSize, search });
   const items = (data?.items ?? []) as Session[];
   const total = data?.total ?? 0;
 
@@ -89,6 +90,7 @@ export default function SessionsPage() {
         isLoading={contentLoading}
         searchKey="ip_address"
         searchPlaceholder="Search by IP..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

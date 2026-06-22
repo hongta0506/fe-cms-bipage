@@ -10,7 +10,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, X, Settings2 } from "lucide-react";
 
 import { Button } from "./button";
@@ -57,6 +57,7 @@ interface DataTableProps<TData, TValue> {
   total?: number;
   pageCount?: number;
   onPaginationChange?: (page: number, pageSize: number) => void;
+  onSearch?: (search: string) => void;
   filters?: FilterOption[];
 }
 
@@ -71,6 +72,7 @@ export function DataTable<TData, TValue>({
   onRowClick,
   total,
   onPaginationChange,
+  onSearch,
   filters = [],
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -79,6 +81,20 @@ export function DataTable<TData, TValue>({
   const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: initialPageSize });
   const isServerPaginated = total !== undefined && total !== null;
+
+  // Debounced server-side search
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const debouncedSearch = useCallback(
+    (value: string) => {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onSearch?.(value);
+        if (isServerPaginated) setPagination((p) => ({ ...p, pageIndex: 0 }));
+      }, 300);
+    },
+    [onSearch, isServerPaginated],
+  );
+  useEffect(() => () => clearTimeout(debounceRef.current), []);
 
   const searchedData =
     searchKey && search
@@ -157,7 +173,10 @@ export function DataTable<TData, TValue>({
           <Input
             placeholder={searchPlaceholder}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              if (onSearch) debouncedSearch(e.target.value);
+            }}
             className="max-w-sm"
           />
         )}

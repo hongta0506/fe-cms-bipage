@@ -35,13 +35,14 @@ export default function CrawlSourcesPage() {
   const user = useAuthStore((s) => s.user);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [editItem, setEditItem] = useState<CrawlSource | null>(null);
   const [deleteItem, setDeleteItem] = useState<CrawlSource | null>(null);
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  const { data, isLoading: contentLoading } = useContentAll("crawl_sources", { page, pageSize });
+  const { data, isLoading: contentLoading } = useContentAll("crawl_sources", { page, pageSize, search });
   if (isLoading || !user) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -105,6 +106,7 @@ export default function CrawlSourcesPage() {
         isLoading={contentLoading}
         searchKey="name"
         searchPlaceholder="Search by name..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}

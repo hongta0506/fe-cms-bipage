@@ -20,11 +20,12 @@ interface Author {
 }
 
 export function AuthorsTable() {
+  const [search, setSearch] = useState("");
   const [editAuthor, setEditAuthor] = useState<Author | null>(null);
   const [deleteAuthor, setDeleteAuthor] = useState<Author | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContentAll("authors", { page, pageSize });
+  const { data, isLoading } = useContentAll("authors", { page, pageSize, search });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("authors");
 
@@ -72,6 +73,7 @@ export function AuthorsTable() {
         isLoading={isLoading}
         searchKey="username"
         searchPlaceholder="Search authors..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

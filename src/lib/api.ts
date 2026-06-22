@@ -61,13 +61,14 @@ class ApiClient {
 
   async getContent(
     schema: string,
-    options?: { page?: number; pageSize?: number; filter?: string; sort?: string; domainId?: number | null },
+    options?: { page?: number; pageSize?: number; filter?: string; sort?: string; domainId?: number | null; search?: string },
   ) {
     const params = new URLSearchParams();
     if (options?.page != null && options.page > 0) params.set("page", String(options.page));
     if (options?.pageSize != null && options.pageSize > 0) params.set("limit", String(options.pageSize));
     if (options?.filter) params.set("filter", options.filter);
     if (options?.sort) params.set("sort", options.sort);
+    if (options?.search) params.set("search", options.search);
     if (options?.domainId) {
       params.set("filter", JSON.stringify({ domain_id: options.domainId }));
     }

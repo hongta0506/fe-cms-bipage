@@ -32,11 +32,12 @@ interface Banner {
 }
 
 export function BannersTable() {
+  const [search, setSearch] = useState("");
   const [editBanner, setEditBanner] = useState<Banner | null>(null);
   const [deleteBanner, setDeleteBanner] = useState<Banner | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("banners", { page, pageSize });
+  const { data, isLoading } = useContent("banners", { page, pageSize, search });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("banners");
 
@@ -91,6 +92,7 @@ export function BannersTable() {
         isLoading={isLoading}
         searchKey="title"
         searchPlaceholder="Search banners..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {
