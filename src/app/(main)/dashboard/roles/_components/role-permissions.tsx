@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 
 // Static permission resource tree — all available API endpoints
 const PERMISSION_TREE: { group: string; resources: string[] }[] = [
@@ -230,22 +229,25 @@ const PERMISSION_TREE: { group: string; resources: string[] }[] = [
 interface RolePermissionsProps {
   selectedResources: string[];
   onToggle: (resource: string) => void;
+  onToggleGroup?: (resources: string[], select: boolean) => void;
 }
 
-export function RolePermissions({ selectedResources, onToggle }: RolePermissionsProps) {
+export function RolePermissions({ selectedResources, onToggle, onToggleGroup }: RolePermissionsProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const toggleGroup = (group: string) => {
     setExpanded((prev) => ({ ...prev, [group]: !prev[group] }));
   };
 
-  const toggleAllInGroup = (resources: string[]) => {
-    const allSelected = resources.every((r) => selectedResources.includes(r));
-    resources.forEach((r) => {
-      if (allSelected !== selectedResources.includes(r)) {
-        onToggle(r);
-      }
-    });
+  const toggleAllInGroup = (groupResources: string[]) => {
+    const allSelected = groupResources.every((r) => selectedResources.includes(r));
+    if (onToggleGroup) {
+      onToggleGroup(groupResources, !allSelected);
+    } else {
+      groupResources.forEach((r) => {
+        if (allSelected !== selectedResources.includes(r)) onToggle(r);
+      });
+    }
   };
 
   return (
@@ -258,22 +260,25 @@ export function RolePermissions({ selectedResources, onToggle }: RolePermissions
 
         return (
           <div key={group} className="border rounded-md">
-            <div
-              className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-muted/50"
-              onClick={() => toggleGroup(group)}
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4 shrink-0" />
-              ) : (
-                <ChevronRight className="h-4 w-4 shrink-0" />
-              )}
-              <Checkbox
-                checked={allSelected ? true : someSelected ? "indeterminate" : false}
-                onCheckedChange={() => toggleAllInGroup(resources)}
-                onClick={(e) => e.stopPropagation()}
+            <div className="flex items-center gap-2 px-3 py-2 hover:bg-muted/50">
+              <span className="cursor-pointer" onClick={() => toggleGroup(group)}>
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4 shrink-0" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 shrink-0" />
+                )}
+              </span>
+              <input
+                type="checkbox"
+                ref={(el) => { if (el) el.indeterminate = someSelected; }}
+                checked={allSelected}
+                onChange={() => toggleAllInGroup(resources)}
+                className="h-4 w-4 rounded border-input"
               />
-              <span className="text-sm font-medium flex-1">{group}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-sm font-medium flex-1 cursor-pointer" onClick={() => toggleGroup(group)}>
+                {group}
+              </span>
+              <span className="text-xs text-muted-foreground cursor-pointer" onClick={() => toggleGroup(group)}>
                 {selectedCount}/{resources.length}
               </span>
             </div>
@@ -281,9 +286,11 @@ export function RolePermissions({ selectedResources, onToggle }: RolePermissions
               <div className="border-t px-3 py-2 space-y-1">
                 {resources.map((resource) => (
                   <label key={resource} className="flex items-center gap-2 cursor-pointer py-0.5">
-                    <Checkbox
+                    <input
+                      type="checkbox"
                       checked={selectedResources.includes(resource)}
-                      onCheckedChange={() => onToggle(resource)}
+                      onChange={() => onToggle(resource)}
+                      className="h-4 w-4 rounded border-input"
                     />
                     <span className="text-sm">{resource}</span>
                   </label>
