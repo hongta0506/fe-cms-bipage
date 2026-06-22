@@ -30,7 +30,7 @@ export function UsersTable() {
   const [pageSize, setPageSize] = useState(20);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
-  const { data, isLoading } = useContentAll("user", { page, pageSize, search });
+  const { data, isLoading } = useContentAll("user", { page, pageSize, search, searchField: "username" });
   const deleteMutation = useDeleteContent("user");
 
   const users = (data?.items ?? []) as User[];
@@ -104,7 +104,7 @@ export function UsersTable() {
         isLoading={isLoading}
         searchKey="username"
         searchPlaceholder="Search users..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

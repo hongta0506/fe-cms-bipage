@@ -61,16 +61,25 @@ class ApiClient {
 
   async getContent(
     schema: string,
-    options?: { page?: number; pageSize?: number; filter?: string; sort?: string; domainId?: number | null; search?: string },
+    options?: { page?: number; pageSize?: number; filter?: string; sort?: string; domainId?: number | null; search?: string; searchField?: string },
   ) {
     const params = new URLSearchParams();
     if (options?.page != null && options.page > 0) params.set("page", String(options.page));
     if (options?.pageSize != null && options.pageSize > 0) params.set("limit", String(options.pageSize));
     if (options?.filter) params.set("filter", options.filter);
     if (options?.sort) params.set("sort", options.sort);
-    if (options?.search) params.set("search", options.search);
     if (options?.domainId) {
       params.set("filter", JSON.stringify({ domain_id: options.domainId }));
+    }
+    // Server-side search via $like filter — merge with existing filter
+    if (options?.search && options?.searchField) {
+      const searchFilter = { [options.searchField]: { $like: `%${options.search}%` } };
+      const existingFilterStr = params.get("filter");
+      let existingFilter: Record<string, unknown> = {};
+      if (existingFilterStr) {
+        try { existingFilter = JSON.parse(existingFilterStr); } catch {}
+      }
+      params.set("filter", JSON.stringify({ ...existingFilter, ...searchFilter }));
     }
     const query = params.toString();
     return this.request<{ items: unknown[]; total: number; per_page: number; current_page: number; last_page: number }>(

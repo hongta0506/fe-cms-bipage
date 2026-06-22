@@ -24,7 +24,7 @@ export function TagsTable() {
   const [deleteTag, setDeleteTag] = useState<Tag | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContentAll("tags", { page, pageSize, search });
+  const { data, isLoading } = useContentAll("tags", { page, pageSize, search, searchField: "name" });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("tags");
 
@@ -71,7 +71,7 @@ export function TagsTable() {
         isLoading={isLoading}
         searchKey="name"
         searchPlaceholder="Search tags..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

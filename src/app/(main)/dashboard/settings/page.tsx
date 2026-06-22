@@ -37,7 +37,7 @@ export default function SettingsPage() {
   const [pageSize, setPageSize] = useState(20);
   const deleteMutation = useDeleteContent("settings");
 
-  const { data, isLoading: contentLoading } = useContentAll("settings", { page, pageSize: 500, search });
+  const { data, isLoading: contentLoading } = useContentAll("settings", { page, pageSize: 500, search, searchField: "key" });
   const allItems = (data?.items ?? []) as Setting[];
   const items = groupFilter === "all" ? allItems : allItems.filter((i) => i.group === groupFilter);
   const total = items.length;
@@ -94,7 +94,7 @@ export default function SettingsPage() {
         isLoading={contentLoading}
         searchKey="key"
         searchPlaceholder="Search by key..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         filters={[{ key: "group", label: "Group", options: groups.map((g) => ({ label: g, value: g })) }]}
         total={total}
         pageSize={pageSize}

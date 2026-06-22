@@ -27,7 +27,7 @@ export function CategoriesTable() {
   const [pageSize, setPageSize] = useState(20);
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
-  const { data, isLoading } = useContentAll("categories", { page, pageSize, search });
+  const { data, isLoading } = useContentAll("categories", { page, pageSize, search, searchField: "name" });
   const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
   const deleteMutation = useDeleteContent("categories");
 
@@ -92,7 +92,7 @@ export function CategoriesTable() {
         isLoading={isLoading}
         searchKey="name"
         searchPlaceholder="Tìm danh mục..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

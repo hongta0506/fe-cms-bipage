@@ -25,7 +25,7 @@ export function AuthorsTable() {
   const [deleteAuthor, setDeleteAuthor] = useState<Author | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContentAll("authors", { page, pageSize, search });
+  const { data, isLoading } = useContentAll("authors", { page, pageSize, search, searchField: "username" });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("authors");
 
@@ -73,7 +73,7 @@ export function AuthorsTable() {
         isLoading={isLoading}
         searchKey="username"
         searchPlaceholder="Search authors..."
-        onSearch={setSearch}
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {
