@@ -36,7 +36,8 @@ export function BannersTable() {
   const [deleteBanner, setDeleteBanner] = useState<Banner | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("banners", { page, pageSize });
+  const [search, setSearch] = useState("");
+  const { data, isLoading } = useContent("banners", { page, pageSize, search });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("banners");
 

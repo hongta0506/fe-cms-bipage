@@ -11,7 +11,7 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, X, Settings2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, X, Settings2, Search } from "lucide-react";
 
 import { Button } from "./button";
 import { Input } from "./input";
@@ -58,6 +58,7 @@ interface DataTableProps<TData, TValue> {
   pageCount?: number;
   onPaginationChange?: (page: number, pageSize: number) => void;
   filters?: FilterOption[];
+  onSearch?: (search: string) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -72,19 +73,27 @@ export function DataTable<TData, TValue>({
   total,
   onPaginationChange,
   filters = [],
+  onSearch,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [search, setSearch] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: initialPageSize });
   const isServerPaginated = total !== undefined && total !== null;
 
+  const triggerSearch = () => {
+    setAppliedSearch(search);
+    onSearch?.(search);
+    if (isServerPaginated) setPagination((p) => ({ ...p, pageIndex: 0 }));
+  };
+
   const searchedData =
-    searchKey && search
+    searchKey && appliedSearch
       ? data.filter((row) => {
           const value = (row as Record<string, unknown>)[searchKey];
-          return String(value ?? "").toLowerCase().includes(search.toLowerCase());
+          return String(value ?? "").toLowerCase().includes(appliedSearch.toLowerCase());
         })
       : data;
 
@@ -154,12 +163,18 @@ export function DataTable<TData, TValue>({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         {searchKey && (
-          <Input
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-sm"
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder={searchPlaceholder}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") triggerSearch(); }}
+              className="max-w-sm"
+            />
+            <Button variant="outline" size="sm" onClick={triggerSearch}>
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
         )}
         {filters.map((filter) => (
           <Select

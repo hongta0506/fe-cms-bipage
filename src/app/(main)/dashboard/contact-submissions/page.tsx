@@ -38,6 +38,7 @@ export default function ContactSubmissionsPage() {
   const user = useAuthStore((s) => s.user);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const [detailItem, setDetailItem] = useState<ContactSubmission | null>(null);
   const [deleteItem, setDeleteItem] = useState<ContactSubmission | null>(null);
   const deleteMutation = useDeleteContent("contact_submissions");
@@ -45,7 +46,7 @@ export default function ContactSubmissionsPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  const { data, isLoading: contentLoading } = useContentAll("contact_submissions", { page, pageSize });
+  const { data, isLoading: contentLoading } = useContentAll("contact_submissions", { page, pageSize, search });
 
   if (isLoading || !user) {
     return (

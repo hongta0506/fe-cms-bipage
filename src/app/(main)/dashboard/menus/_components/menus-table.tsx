@@ -27,9 +27,10 @@ interface Menu {
 export function MenusTable() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const [editMenu, setEditMenu] = useState<Menu | null>(null);
   const [deleteMenu, setDeleteMenu] = useState<Menu | null>(null);
-  const { data, isLoading } = useContentAll("menus", { page, pageSize });
+  const { data, isLoading } = useContentAll("menus", { page, pageSize, search });
   const deleteMutation = useDeleteContent("menus");
 
   const menus = (data?.items ?? []) as Menu[];

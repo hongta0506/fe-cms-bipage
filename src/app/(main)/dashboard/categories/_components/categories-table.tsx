@@ -24,9 +24,10 @@ interface Category {
 export function CategoriesTable() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
-  const { data, isLoading } = useContentAll("categories", { page, pageSize });
+  const { data, isLoading } = useContentAll("categories", { page, pageSize, search });
   const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
   const deleteMutation = useDeleteContent("categories");
 

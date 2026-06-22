@@ -51,6 +51,7 @@ export default function FilesPage() {
   const user = useAuthStore((s) => s.user);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
   const [deleteItem, setDeleteItem] = useState<FileItem | null>(null);
   const deleteMutation = useDeleteContent("file");
