@@ -259,7 +259,10 @@ export function RolePermissions({ selectedResources, onToggle }: RolePermissions
           <div key={group} className="border rounded-md">
             <div
               className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-muted/50"
-              onClick={() => toggleGroup(group)}
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest("input[type=checkbox]")) return;
+                toggleGroup(group);
+              }}
             >
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4 shrink-0" />
@@ -271,7 +274,6 @@ export function RolePermissions({ selectedResources, onToggle }: RolePermissions
                 ref={(el) => { if (el) el.indeterminate = someSelected; }}
                 checked={allSelected}
                 onChange={() => toggleAllInGroup(resources)}
-                onClick={(e) => e.stopPropagation()}
                 className="h-4 w-4 rounded border-input"
               />
               <span className="text-sm font-medium flex-1">{group}</span>
