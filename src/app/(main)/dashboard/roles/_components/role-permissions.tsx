@@ -257,18 +257,14 @@ export function RolePermissions({ selectedResources, onToggle }: RolePermissions
 
         return (
           <div key={group} className="border rounded-md">
-            <div
-              className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-muted/50"
-              onClick={(e) => {
-                if ((e.target as HTMLElement).closest("input[type=checkbox]")) return;
-                toggleGroup(group);
-              }}
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4 shrink-0" />
-              ) : (
-                <ChevronRight className="h-4 w-4 shrink-0" />
-              )}
+            <div className="flex items-center gap-2 px-3 py-2 hover:bg-muted/50">
+              <span className="cursor-pointer" onClick={() => toggleGroup(group)}>
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4 shrink-0" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 shrink-0" />
+                )}
+              </span>
               <input
                 type="checkbox"
                 ref={(el) => { if (el) el.indeterminate = someSelected; }}
@@ -276,8 +272,10 @@ export function RolePermissions({ selectedResources, onToggle }: RolePermissions
                 onChange={() => toggleAllInGroup(resources)}
                 className="h-4 w-4 rounded border-input"
               />
-              <span className="text-sm font-medium flex-1">{group}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-sm font-medium flex-1 cursor-pointer" onClick={() => toggleGroup(group)}>
+                {group}
+              </span>
+              <span className="text-xs text-muted-foreground cursor-pointer" onClick={() => toggleGroup(group)}>
                 {selectedCount}/{resources.length}
               </span>
             </div>
