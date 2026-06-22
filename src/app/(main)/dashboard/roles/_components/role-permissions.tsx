@@ -229,22 +229,25 @@ const PERMISSION_TREE: { group: string; resources: string[] }[] = [
 interface RolePermissionsProps {
   selectedResources: string[];
   onToggle: (resource: string) => void;
+  onToggleGroup?: (resources: string[], select: boolean) => void;
 }
 
-export function RolePermissions({ selectedResources, onToggle }: RolePermissionsProps) {
+export function RolePermissions({ selectedResources, onToggle, onToggleGroup }: RolePermissionsProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const toggleGroup = (group: string) => {
     setExpanded((prev) => ({ ...prev, [group]: !prev[group] }));
   };
 
-  const toggleAllInGroup = (resources: string[]) => {
-    const allSelected = resources.every((r) => selectedResources.includes(r));
-    resources.forEach((r) => {
-      if (allSelected !== selectedResources.includes(r)) {
-        onToggle(r);
-      }
-    });
+  const toggleAllInGroup = (groupResources: string[]) => {
+    const allSelected = groupResources.every((r) => selectedResources.includes(r));
+    if (onToggleGroup) {
+      onToggleGroup(groupResources, !allSelected);
+    } else {
+      groupResources.forEach((r) => {
+        if (allSelected !== selectedResources.includes(r)) onToggle(r);
+      });
+    }
   };
 
   return (

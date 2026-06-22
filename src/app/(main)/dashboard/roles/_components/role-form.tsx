@@ -89,6 +89,16 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
     );
   };
 
+  const handleToggleGroup = (resources: string[], select: boolean) => {
+    setSelectedResources((prev) => {
+      if (select) {
+        return [...new Set([...prev, ...resources])];
+      } else {
+        return prev.filter((r) => !resources.includes(r));
+      }
+    });
+  };
+
   const onSubmit = async (values: RoleFormValues) => {
     if (!isEdit || !role) {
       createMutation.mutate(values, { onSuccess: () => onOpenChange(false) });
@@ -205,7 +215,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading permissions...
                 </div>
               ) : (
-                <RolePermissions selectedResources={selectedResources} onToggle={handleToggle} />
+                <RolePermissions selectedResources={selectedResources} onToggle={handleToggle} onToggleGroup={handleToggleGroup} />
               )}
             </div>
           </TabsContent>
