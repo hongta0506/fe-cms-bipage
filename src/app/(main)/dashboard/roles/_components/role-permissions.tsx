@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 
 // Static permission resource tree — all available API endpoints
 const PERMISSION_TREE: { group: string; resources: string[] }[] = [
@@ -267,10 +266,13 @@ export function RolePermissions({ selectedResources, onToggle }: RolePermissions
               ) : (
                 <ChevronRight className="h-4 w-4 shrink-0" />
               )}
-              <Checkbox
-                checked={allSelected ? true : someSelected ? "indeterminate" : false}
-                onCheckedChange={() => toggleAllInGroup(resources)}
+              <input
+                type="checkbox"
+                ref={(el) => { if (el) el.indeterminate = someSelected; }}
+                checked={allSelected}
+                onChange={() => toggleAllInGroup(resources)}
                 onClick={(e) => e.stopPropagation()}
+                className="h-4 w-4 rounded border-input"
               />
               <span className="text-sm font-medium flex-1">{group}</span>
               <span className="text-xs text-muted-foreground">
@@ -281,9 +283,11 @@ export function RolePermissions({ selectedResources, onToggle }: RolePermissions
               <div className="border-t px-3 py-2 space-y-1">
                 {resources.map((resource) => (
                   <label key={resource} className="flex items-center gap-2 cursor-pointer py-0.5">
-                    <Checkbox
+                    <input
+                      type="checkbox"
                       checked={selectedResources.includes(resource)}
-                      onCheckedChange={() => onToggle(resource)}
+                      onChange={() => onToggle(resource)}
+                      className="h-4 w-4 rounded border-input"
                     />
                     <span className="text-sm">{resource}</span>
                   </label>
