@@ -7,7 +7,6 @@ import { z } from "zod";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -153,11 +152,13 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                 {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox
+                <input
+                  type="checkbox"
                   id="root"
                   checked={watch("root")}
-                  onCheckedChange={(checked) => {
-                    setValue("root", !!checked);
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setValue("root", checked);
                     if (checked) {
                       setSelectedResources([
                         "auth.me", "auth.login", "auth.register", "auth.logout", "auth.refresh", "auth.forgot_password", "auth.reset_password", "auth.verify_email", "auth.change_password", "auth.revoke_all",
@@ -189,6 +190,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                       setSelectedResources([]);
                     }
                   }}
+                  className="h-4 w-4 rounded border-input"
                 />
                 <Label htmlFor="root" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Root (Full Access)
