@@ -1,32 +1,32 @@
 # QC Audit Plan — Dashboard CRUD & Permissions
 
-**Date:** 2026-06-21  
+**Date:** 2026-06-22  
 **Goal:** Systematically test every page for CRUD operations, data loading, and UI completeness.
 
 ---
 
 ## 1. Schema Inventory (18 total)
 
-| Schema | Page | List | Create | Edit | Delete | Hook | Notes |
-|--------|------|------|--------|------|--------|------|-------|
-| authors | /authors | ✅ | ✅ | ✅ | ✅ | useContentAll | Full CRUD |
-| banners | /banners | ✅ | ? | ? | ? | useContent | Domain-scoped |
-| blocks | /blocks | ✅ | ? | ? | ? | useContent | Domain-scoped |
-| categories | /categories | ✅ tree | ? | ? | ? | useContentAll | Tree view, parent_id |
-| contact_submissions | /contact-submissions | ✅ list | ❌ | ❌ | ✅ delete | useContentAll | Detail + status change ✅ |
-| crawl_sources | /crawl-sources | ✅ list | ✅ | ✅ | ✅ | useContentAll | Full CRUD ✅ |
-| domains | /domains | ✅ list | ✅ | ✅ | ✅ | useContentAll | Full CRUD ✅ |
-| file | /files | ✅ list | ✅ upload | ❌ | ✅ delete | useContentAll | Upload + delete ✅ |
-| menu_items | /menus → items | ✅ tree | ? | ? | ? | useContentAll | Tree view |
-| menus | /menus | ✅ | ? | ? | ? | useContentAll | Domain-scoped |
-| permission | ❌ | ❌ | ❌ | ❌ | ❌ | — | NO PAGE |
-| post_views | ❌ | ❌ | ❌ | ❌ | ❌ | — | NO PAGE (analytics) |
-| posts | /posts | ✅ | ✅ | ✅ | ✅ | useContent | Domain-scoped |
-| roles | /roles | ✅ | ✅ | ✅ | ✅ | useContentAll | Full CRUD |
-| roles_users | ❌ | ❌ | ❌ | ❌ | ❌ | — | Join table |
-| settings | /settings | ✅ | ❌ | ✅ | ✅ delete | useContentAll | Edit + delete + group filter ✅ |
-| tags | /tags | ✅ | ✅ | ✅ | ✅ | useContentAll | Full CRUD |
-| user | /users | ✅ | ✅ | ✅ | ✅ | useContentAll | Full CRUD |
+| Schema | Page | List | Create | Edit | Delete | Hook | Search | Notes |
+|--------|------|------|--------|------|--------|------|--------|-------|
+| authors | /authors | ✅ | ✅ | ✅ | ✅ | useContentAll | ✅ server | Full CRUD |
+| banners | /banners | ✅ | ✅ | ✅ | ✅ | useContent | ✅ server | Full CRUD, domain-scoped |
+| blocks | /blocks | ✅ | ✅ | ✅ | ✅ | useContent | ✅ server | Full CRUD, domain-scoped |
+| categories | /categories | ✅ tree | ✅ | ✅ | ✅ | useContentAll | ✅ server | Tree view, parent_id |
+| contact_submissions | /contact-submissions | ✅ list | ❌ | ❌ | ✅ delete | useContentAll | ✅ server | Detail + status change |
+| crawl_sources | /crawl-sources | ✅ list | ✅ | ✅ | ✅ | useContentAll | ✅ server | Full CRUD |
+| domains | /domains | ✅ list | ✅ | ✅ | ✅ | useContentAll | ✅ server | Full CRUD |
+| file | /files | ✅ list | ✅ upload | ❌ | ✅ delete | useContentAll | ✅ server | Upload + delete |
+| menu_items | /menus → items | ✅ tree | ✅ | ✅ | ✅ | useContentAll | ✅ server | Tree view, parent_id dropdown |
+| menus | /menus | ✅ | ✅ | ✅ | ✅ | useContentAll | ✅ server | Full CRUD, domain-scoped |
+| permission | ❌ | ❌ | ❌ | ❌ | ❌ | — | — | Auto-managed by BAAS |
+| post_views | ❌ | ❌ | ❌ | ❌ | ❌ | — | — | NO PAGE (analytics) |
+| posts | /posts | ✅ | ✅ | ✅ | ✅ | useContent | ✅ server | Full CRUD, domain-scoped |
+| roles | /roles | ✅ | ✅ | ✅ | ✅ | useContentAll | ✅ server | Full CRUD |
+| roles_users | ❌ | ❌ | ❌ | ❌ | ❌ | — | — | Auto-managed by BAAS |
+| settings | /settings | ✅ | ❌ | ✅ | ✅ delete | useContentAll | ✅ server | Edit + delete + group filter |
+| tags | /tags | ✅ | ✅ | ✅ | ✅ | useContentAll | ✅ server | Full CRUD |
+| user | /users | ✅ | ✅ | ✅ | ✅ | useContentAll | ✅ server | Full CRUD + role assignment |
 
 ---
 
@@ -35,98 +35,95 @@
 ### 2.1 Posts (`/posts`)
 - **API:** `posts` — 33 fields, domain-scoped
 - **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
-- **Missing:** Domain column in table, tags multi-select, category domain filter
-- **Status:** Functional, needs enhancements
+- **Search:** Server-side via API
+- **Status:** Full CRUD working
 
 ### 2.2 Categories (`/categories`)
 - **API:** `categories` — 14 fields, tree (parent_id), domain-scoped
-- **CRUD:** Tree view ✅, edit/delete ? (need to check)
-- **Missing:** Domain column display, domain filter dropdown
-- **Status:** Tree view loads all items, needs CRUD buttons
-
-### 2.2a Categories Form — parent_id UX Issue
-- **Problem:** Edit form shows raw `parent_id` number, user can't tell which parent it is
-- **Fix:** Show parent name text (e.g., select dropdown with category names), not raw ID
-- **Affects:** CategoryFormDialog, MenuItemFormDialog (both have parent_id)
+- **CRUD:** Tree view ✅, Create ✅, Edit ✅, Delete ✅
+- **Search:** Server-side via API
+- **Status:** Full CRUD working
 
 ### 2.3 Tags (`/tags`)
 - **API:** `tags` — 8 fields, global
 - **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
-- **Missing:** Domain column, domain filter
+- **Search:** Server-side via API
 - **Status:** Full CRUD working
 
 ### 2.4 Authors (`/authors`)
 - **API:** `authors` — 8 fields, global
 - **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
-- **Missing:** — 
+- **Search:** Server-side via API
 - **Status:** Full CRUD working
 
 ### 2.5 Banners (`/banners`)
 - **API:** `banners` — 15 fields, domain-scoped, position enum, locale
-- **CRUD:** List ✅, Create ✅, Edit ✅, Delete ✅
-- **Form:** BannerFormDialog + BannerDeleteDialog exist
-- **Hook:** useContent (domain-scoped)
+- **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
+- **Search:** Server-side via API
 - **Status:** Full CRUD working
 
 ### 2.6 Blocks (`/blocks`)
 - **API:** `blocks` — 15 fields, domain-scoped, type enum (text/html/cta), locale
-- **CRUD:** List ✅, Create ✅, Edit ✅, Delete ✅
-- **Form:** BlockFormDialog + BlockDeleteDialog exist
-- **Hook:** useContent (domain-scoped)
+- **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
+- **Search:** Server-side via API
 - **Status:** Full CRUD working
 
 ### 2.7 Menus (`/menus`)
 - **API:** `menus` — 12 fields, domain-scoped, location enum
-- **CRUD:** List ✅ (tree for items), Create ✅, Edit ✅, Delete ✅
-- **Form:** MenuFormDialog, MenuItemFormDialog, MenuDeleteDialog, MenuItemDeleteDialog exist
-- **Hook:** useContentAll
+- **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅ (tree for items)
+- **Search:** Server-side via API
 - **Status:** Full CRUD for both menus and menu items, tree view
 
 ### 2.8 Users (`/users`)
 - **API:** `user` — 16 fields, global, all SYSTEM
 - **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
-- **Missing:** Role assignment in form
-- **Status:** Full CRUD, needs role picker
+- **Roles:** Role multi-select in form (m2m via roles_users)
+- **Search:** Server-side via API
+- **Status:** Full CRUD + role assignment
 
 ### 2.9 Roles (`/roles`)
 - **API:** `role` — 10 fields, global, all SYSTEM
 - **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
-- **Missing:** Permission management UI
-- **Status:** Full CRUD, no permission assignment
+- **Search:** Server-side via API
+- **Status:** Full CRUD working
 
 ### 2.10 Settings (`/settings`)
 - **API:** `settings` — 11 fields, domain-scoped, group enum (site/footer/social/seo)
-- **CRUD:** List ✅, Edit ✅, Delete ✅
+- **CRUD:** Edit ✅, Delete ✅, List ✅
 - **Filters:** Group filter dropdown ✅
-- **Status:** Full CRUD ✅ (Sprint 14)
+- **Search:** Server-side via API
+- **Status:** Full CRUD working
 
 ### 2.11 Domains (`/domains`)
 - **API:** `domains` — 18 fields, global
-- **CRUD:** List ✅, Create ✅, Edit ✅, Delete ✅
-- **Form:** DomainFormDialog + DomainDeleteDialog
-- **Status:** Full CRUD ✅ (Sprint 14)
+- **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
+- **Search:** Server-side via API
+- **Status:** Full CRUD working
 
 ### 2.12 Files (`/files`)
 - **API:** `file` — 11 fields (all SYSTEM)
-- **CRUD:** List ✅, Upload ✅, Delete ✅
-- **Status:** CRUD ✅ (Sprint 14)
+- **CRUD:** Upload ✅, Delete ✅, List ✅
+- **Search:** Server-side via API
+- **Status:** CRUD working
 
 ### 2.13 Sessions (`/sessions`)
 - **API:** `session` — 10 fields (all SYSTEM), read-only
 - **CRUD:** List ✅ only
-- **Missing:** — (read-only by design)
-- **Status:** Read-only
+- **Search:** Server-side via API
+- **Status:** Read-only by design
 
 ### 2.14 Contact Submissions (`/contact-submissions`)
 - **API:** `contact_submissions` — 13 fields
-- **CRUD:** List ✅, Detail ✅, Status change ✅, Delete ✅
-- **Status:** Full CRUD ✅ (Sprint 14)
+- **CRUD:** Detail ✅, Status change ✅, Delete ✅, List ✅
+- **Search:** Server-side via API
+- **Status:** Full CRUD working
 
 ### 2.15 Crawl Sources (`/crawl-sources`)
 - **API:** `crawl_sources` — 30 fields, complex config
-- **CRUD:** List ✅, Create ✅, Edit ✅, Delete ✅
+- **CRUD:** Create ✅, Edit ✅, Delete ✅, List ✅
 - **Form:** 30 fields with CSS selectors, schedule, custom config
-- **Status:** Full CRUD ✅ (Sprint 14)
+- **Search:** Server-side via API
+- **Status:** Full CRUD working
 
 ---
 

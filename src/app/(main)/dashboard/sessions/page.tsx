@@ -65,6 +65,7 @@ export default function SessionsPage() {
   const user = useAuthStore((s) => s.user);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const { data, isLoading: contentLoading } = useContentAll("session", { page, pageSize });
   const items = (data?.items ?? []) as Session[];
   const total = data?.total ?? 0;

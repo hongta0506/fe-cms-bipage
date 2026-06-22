@@ -26,7 +26,8 @@ export function RolesTable() {
   const [deleteRole, setDeleteRole] = useState<Role | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContentAll("role", { page, pageSize });
+  const [search, setSearch] = useState("");
+  const { data, isLoading } = useContentAll("role", { page, pageSize, search });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("role");
 

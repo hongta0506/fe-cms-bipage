@@ -43,7 +43,8 @@ export function PostsTable() {
   const [selectedPosts, setSelectedPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("posts", { page, pageSize });
+  const [search, setSearch] = useState("");
+  const { data, isLoading } = useContent("posts", { page, pageSize, search });
   const { data: domainsData } = useContentAll("domains", { pageSize: 100 });
   const { data: categoriesData } = useContentAll("categories", { pageSize: 200 });
   const deleteMutation = useDeleteContent("posts");

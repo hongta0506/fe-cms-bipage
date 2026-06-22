@@ -30,9 +30,10 @@ interface MenuItemsTableProps {
 export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
   const [editItem, setEditItem] = useState<MenuItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<MenuItem | null>(null);
-  const { data, isLoading } = useContentAll("menu_items", { page, pageSize });
+  const { data, isLoading } = useContentAll("menu_items", { page, pageSize, search });
   const deleteMutation = useDeleteContent("menu_items");
 
   const items = (data?.items ?? []) as MenuItem[];

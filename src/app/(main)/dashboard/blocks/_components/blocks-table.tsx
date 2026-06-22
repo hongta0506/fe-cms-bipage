@@ -36,7 +36,8 @@ export function BlocksTable() {
   const [deleteBlock, setDeleteBlock] = useState<Block | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, isLoading } = useContent("blocks", { page, pageSize });
+  const [search, setSearch] = useState("");
+  const { data, isLoading } = useContent("blocks", { page, pageSize, search });
   const deleteMutation = useDeleteContent("blocks");
 
   const blocks = (data?.items ?? []) as Block[];

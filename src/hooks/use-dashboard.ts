@@ -10,7 +10,7 @@ export function useStats() {
   });
 }
 
-export function useContent(schema: string, options?: { page?: number; pageSize?: number; sort?: string }) {
+export function useContent(schema: string, options?: { page?: number; pageSize?: number; sort?: string; search?: string }) {
   const domainId = useDomainStore((s) => s.selectedDomainId);
   return useQuery({
     queryKey: ["content", schema, { ...options, domainId }],
@@ -27,7 +27,7 @@ export function useSchemas() {
 }
 
 /** Fetch content WITHOUT domain filter — use for reference data (authors, domains, categories). */
-export function useContentAll(schema: string, options?: { page?: number; pageSize?: number; sort?: string }) {
+export function useContentAll(schema: string, options?: { page?: number; pageSize?: number; sort?: string; search?: string }) {
   return useQuery({
     queryKey: ["content-all", schema, options],
     queryFn: () => api.getContent(schema, options),
