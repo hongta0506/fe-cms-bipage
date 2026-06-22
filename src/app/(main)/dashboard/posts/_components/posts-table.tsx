@@ -242,6 +242,7 @@ export function PostsTable() {
         isLoading={isLoading}
         searchKey="title"
         searchPlaceholder="Tìm bài viết..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

@@ -92,6 +92,7 @@ export function BannersTable() {
         isLoading={isLoading}
         searchKey="title"
         searchPlaceholder="Search banners..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

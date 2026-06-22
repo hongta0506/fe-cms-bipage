@@ -89,6 +89,7 @@ export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
         isLoading={isLoading}
         searchKey="label"
         searchPlaceholder="Search menu items..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

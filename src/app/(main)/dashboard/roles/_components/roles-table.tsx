@@ -82,6 +82,7 @@ export function RolesTable() {
         isLoading={isLoading}
         searchKey="name"
         searchPlaceholder="Search roles..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

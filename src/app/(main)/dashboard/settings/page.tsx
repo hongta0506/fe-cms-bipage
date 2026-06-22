@@ -94,6 +94,7 @@ export default function SettingsPage() {
         isLoading={contentLoading}
         searchKey="key"
         searchPlaceholder="Search by key..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         filters={[{ key: "group", label: "Group", options: groups.map((g) => ({ label: g, value: g })) }]}
         total={total}
         pageSize={pageSize}

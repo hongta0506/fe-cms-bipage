@@ -127,6 +127,7 @@ export default function FilesPage() {
         isLoading={contentLoading}
         searchKey="name"
         searchPlaceholder="Search by name..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

@@ -227,6 +227,9 @@ const PERMISSION_TREE: { group: string; resources: string[] }[] = [
   },
 ];
 
+// Get all resources from the tree
+export const ALL_RESOURCES = PERMISSION_TREE.flatMap((g) => g.resources);
+
 interface RolePermissionsProps {
   selectedResources: string[];
   onToggle: (resource: string) => void;

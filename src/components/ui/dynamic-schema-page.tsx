@@ -365,6 +365,7 @@ export function DynamicSchemaPage({ schema }: { schema: SchemaDef }) {
         isLoading={isLoading}
         searchKey={searchKey}
         searchPlaceholder={`Tìm ${schema.label.toLowerCase()}...`}
+        onSearch={(s) => { /* server-side search handled by parent if needed */ }}
         total={data?.total ?? 0}
         pageSize={pageSize}
         onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}

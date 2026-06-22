@@ -90,6 +90,7 @@ export default function SessionsPage() {
         isLoading={contentLoading}
         searchKey="ip_address"
         searchPlaceholder="Search by IP..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

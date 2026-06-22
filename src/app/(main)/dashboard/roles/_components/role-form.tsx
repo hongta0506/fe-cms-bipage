@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
 import { useCreateContent, useUpdateContent } from "@/hooks/use-dashboard";
-import { RolePermissions } from "./role-permissions";
+import { ALL_RESOURCES, RolePermissions } from "./role-permissions";
 
 const roleSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -153,7 +153,14 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                 {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="root" checked={watch("root")} onCheckedChange={(checked) => setValue("root", !!checked)} />
+                <Checkbox id="root" checked={watch("root")} onCheckedChange={(checked) => {
+                  setValue("root", !!checked);
+                  if (checked) {
+                    setSelectedResources([...ALL_RESOURCES]);
+                  } else {
+                    setSelectedResources([]);
+                  }
+                }} />
                 <Label htmlFor="root" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Root (Full Access)
                 </Label>

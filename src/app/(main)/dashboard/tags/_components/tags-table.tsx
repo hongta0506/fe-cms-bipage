@@ -71,6 +71,7 @@ export function TagsTable() {
         isLoading={isLoading}
         searchKey="name"
         searchPlaceholder="Search tags..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

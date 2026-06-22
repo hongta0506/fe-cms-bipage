@@ -73,6 +73,7 @@ export function AuthorsTable() {
         isLoading={isLoading}
         searchKey="username"
         searchPlaceholder="Search authors..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

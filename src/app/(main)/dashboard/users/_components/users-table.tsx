@@ -104,6 +104,7 @@ export function UsersTable() {
         isLoading={isLoading}
         searchKey="username"
         searchPlaceholder="Search users..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

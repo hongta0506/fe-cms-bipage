@@ -86,6 +86,7 @@ export function MenusTable() {
         isLoading={isLoading}
         searchKey="label"
         searchPlaceholder="Search menus..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

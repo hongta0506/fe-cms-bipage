@@ -103,6 +103,7 @@ export default function ContactSubmissionsPage() {
         isLoading={contentLoading}
         searchKey="email"
         searchPlaceholder="Search by email..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         filters={[{ key: "status", label: "Status", options: [{ label: "Active", value: "active" }, { label: "Pending", value: "pending" }, { label: "Spam", value: "spam" }, { label: "Closed", value: "closed" }] }]}
         total={total}
         pageSize={pageSize}

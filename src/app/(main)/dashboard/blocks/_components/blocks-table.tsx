@@ -92,6 +92,7 @@ export function BlocksTable() {
         isLoading={isLoading}
         searchKey="title"
         searchPlaceholder="Search blocks..."
+        onSearch={(s) => { setSearch(s); setPage(1); }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {
