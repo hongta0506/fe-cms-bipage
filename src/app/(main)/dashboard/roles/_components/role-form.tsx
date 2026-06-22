@@ -153,7 +153,43 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                 {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="root" checked={watch("root")} onCheckedChange={(checked) => setValue("root", !!checked)} />
+                <Checkbox
+                  id="root"
+                  checked={watch("root")}
+                  onCheckedChange={(checked) => {
+                    setValue("root", !!checked);
+                    if (checked) {
+                      setSelectedResources([
+                        "auth.me", "auth.login", "auth.register", "auth.logout", "auth.refresh", "auth.forgot_password", "auth.reset_password", "auth.verify_email", "auth.change_password", "auth.revoke_all",
+                        "schema.list", "schema.get", "schema.create", "schema.update", "schema.delete", "schema.truncate", "schema.import",
+                        "realtime.listen",
+                        "role.list", "role.get", "role.create", "role.update", "role.delete",
+                        "file.list", "file.upload",
+                        "tool.generate",
+                        "config.get", "config.update",
+                        "permission.list", "permission.get", "permission.create", "permission.update", "permission.delete",
+                        "category.list", "category.get", "category.create", "category.update", "category.delete",
+                        "tag.list", "tag.get", "tag.create", "tag.update", "tag.delete",
+                        "menu.list", "menu.get", "menu.create", "menu.update", "menu.delete",
+                        "menu_item.list", "menu_item.get", "menu_item.create", "menu_item.update", "menu_item.delete",
+                        "domain.list", "domain.get", "domain.create", "domain.update", "domain.delete",
+                        "setting.list", "setting.get", "setting.create", "setting.update", "setting.delete",
+                        "user.list", "user.get", "user.create", "user.update", "user.delete",
+                        "session.list", "session.get", "session.create", "session.update", "session.delete",
+                        "author.list", "author.get", "author.create", "author.update", "author.delete",
+                        "banner.list", "banner.get", "banner.create", "banner.update", "banner.delete",
+                        "block.list", "block.get", "block.create", "block.update", "block.delete",
+                        "contact_submission.list", "contact_submission.get", "contact_submission.create", "contact_submission.update", "contact_submission.delete",
+                        "crawl_source.list", "crawl_source.get", "crawl_source.create", "crawl_source.update", "crawl_source.delete",
+                        "post.list", "post.get", "post.create", "post.update", "post.delete",
+                        "file.list", "file.get", "file.create", "file.update", "file.delete",
+                        "docs.spec", "docs.viewer",
+                      ]);
+                    } else {
+                      setSelectedResources([]);
+                    }
+                  }}
+                />
                 <Label htmlFor="root" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Root (Full Access)
                 </Label>
