@@ -39,7 +39,6 @@ export default function ContactSubmissionsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [search, setSearch] = useState("");
   const [detailItem, setDetailItem] = useState<ContactSubmission | null>(null);
   const [deleteItem, setDeleteItem] = useState<ContactSubmission | null>(null);
   const deleteMutation = useDeleteContent("contact_submissions");

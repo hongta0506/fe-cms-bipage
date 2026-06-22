@@ -30,7 +30,6 @@ export default function DomainsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [editItem, setEditItem] = useState<Domain | null>(null);
   const [deleteItem, setDeleteItem] = useState<Domain | null>(null);
