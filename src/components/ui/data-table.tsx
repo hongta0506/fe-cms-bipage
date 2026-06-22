@@ -57,8 +57,8 @@ interface DataTableProps<TData, TValue> {
   total?: number;
   pageCount?: number;
   onPaginationChange?: (page: number, pageSize: number) => void;
-  filters?: FilterOption[];
   onSearch?: (search: string) => void;
+  filters?: FilterOption[];
 }
 
 export function DataTable<TData, TValue>({
@@ -72,8 +72,8 @@ export function DataTable<TData, TValue>({
   onRowClick,
   total,
   onPaginationChange,
-  filters = [],
   onSearch,
+  filters = [],
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

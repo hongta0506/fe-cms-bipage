@@ -106,6 +106,7 @@ export default function CrawlSourcesPage() {
         isLoading={contentLoading}
         searchKey="name"
         searchPlaceholder="Search by name..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}

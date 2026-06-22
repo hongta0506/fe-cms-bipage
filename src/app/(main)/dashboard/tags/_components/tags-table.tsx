@@ -19,11 +19,11 @@ interface Tag {
 }
 
 export function TagsTable() {
+  const [search, setSearch] = useState("");
   const [editTag, setEditTag] = useState<Tag | null>(null);
   const [deleteTag, setDeleteTag] = useState<Tag | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [search, setSearch] = useState("");
   const { data, isLoading } = useContentAll("tags", { page, pageSize, search });
   const total = data?.total ?? 0;
   const deleteMutation = useDeleteContent("tags");
@@ -71,6 +71,7 @@ export function TagsTable() {
         isLoading={isLoading}
         searchKey="name"
         searchPlaceholder="Search tags..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

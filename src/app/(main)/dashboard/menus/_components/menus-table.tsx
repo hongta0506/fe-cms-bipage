@@ -25,9 +25,9 @@ interface Menu {
 }
 
 export function MenusTable() {
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [search, setSearch] = useState("");
   const [editMenu, setEditMenu] = useState<Menu | null>(null);
   const [deleteMenu, setDeleteMenu] = useState<Menu | null>(null);
   const { data, isLoading } = useContentAll("menus", { page, pageSize, search });
@@ -86,6 +86,7 @@ export function MenusTable() {
         isLoading={isLoading}
         searchKey="label"
         searchPlaceholder="Search menus..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

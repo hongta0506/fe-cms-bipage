@@ -32,11 +32,11 @@ interface Block {
 }
 
 export function BlocksTable() {
+  const [search, setSearch] = useState("");
   const [editBlock, setEditBlock] = useState<Block | null>(null);
   const [deleteBlock, setDeleteBlock] = useState<Block | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [search, setSearch] = useState("");
   const { data, isLoading } = useContent("blocks", { page, pageSize, search });
   const deleteMutation = useDeleteContent("blocks");
 
@@ -92,6 +92,7 @@ export function BlocksTable() {
         isLoading={isLoading}
         searchKey="title"
         searchPlaceholder="Search blocks..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {

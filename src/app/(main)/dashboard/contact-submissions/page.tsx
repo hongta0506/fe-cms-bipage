@@ -36,9 +36,9 @@ export default function ContactSubmissionsPage() {
   const router = useRouter();
   const isLoading = useAuthStore((s) => s.isLoading);
   const user = useAuthStore((s) => s.user);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [search, setSearch] = useState("");
   const [detailItem, setDetailItem] = useState<ContactSubmission | null>(null);
   const [deleteItem, setDeleteItem] = useState<ContactSubmission | null>(null);
   const deleteMutation = useDeleteContent("contact_submissions");
@@ -103,6 +103,7 @@ export default function ContactSubmissionsPage() {
         isLoading={contentLoading}
         searchKey="email"
         searchPlaceholder="Search by email..."
+        onSearch={setSearch}
         filters={[{ key: "status", label: "Status", options: [{ label: "Active", value: "active" }, { label: "Pending", value: "pending" }, { label: "Spam", value: "spam" }, { label: "Closed", value: "closed" }] }]}
         total={total}
         pageSize={pageSize}

@@ -32,12 +32,12 @@ export default function SettingsPage() {
   const [editItem, setEditItem] = useState<Setting | null>(null);
   const [deleteItem, setDeleteItem] = useState<Setting | null>(null);
   const [groupFilter, setGroupFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [search, setSearch] = useState("");
   const deleteMutation = useDeleteContent("settings");
 
-  const { data, isLoading: contentLoading } = useContentAll("settings", { page, pageSize: 500 });
+  const { data, isLoading: contentLoading } = useContentAll("settings", { page, pageSize: 500, search });
   const allItems = (data?.items ?? []) as Setting[];
   const items = groupFilter === "all" ? allItems : allItems.filter((i) => i.group === groupFilter);
   const total = items.length;
@@ -94,6 +94,7 @@ export default function SettingsPage() {
         isLoading={contentLoading}
         searchKey="key"
         searchPlaceholder="Search by key..."
+        onSearch={setSearch}
         filters={[{ key: "group", label: "Group", options: groups.map((g) => ({ label: g, value: g })) }]}
         total={total}
         pageSize={pageSize}

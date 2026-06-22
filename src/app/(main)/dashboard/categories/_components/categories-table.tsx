@@ -22,9 +22,9 @@ interface Category {
 }
 
 export function CategoriesTable() {
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [search, setSearch] = useState("");
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
   const { data, isLoading } = useContentAll("categories", { page, pageSize, search });
@@ -92,6 +92,7 @@ export function CategoriesTable() {
         isLoading={isLoading}
         searchKey="name"
         searchPlaceholder="Tìm danh mục..."
+        onSearch={setSearch}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {
