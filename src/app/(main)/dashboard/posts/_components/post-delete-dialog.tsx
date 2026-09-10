@@ -3,12 +3,7 @@
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface PostDeleteDialogProps {
   open: boolean;
@@ -25,7 +20,7 @@ export function PostDeleteDialog({ open, onOpenChange, post, onConfirm, isPendin
         <DialogHeader>
           <DialogTitle>Delete Post</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Are you sure you want to delete <strong>{post.title}</strong>? This action cannot be undone.
         </p>
         <div className="flex justify-end gap-2">

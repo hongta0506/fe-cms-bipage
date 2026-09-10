@@ -1,11 +1,14 @@
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
+
+import { useParams, useRouter } from "next/navigation";
+
 import { Loader2 } from "lucide-react";
-import { useAuthStore } from "@/stores/auth/auth-store";
-import { useSchemas } from "@/hooks/use-dashboard";
+
 import { DynamicSchemaPage } from "@/components/ui/dynamic-schema-page";
+import { useSchemas } from "@/hooks/use-dashboard";
+import { useAuthStore } from "@/stores/auth/auth-store";
 
 export default function DynamicSchemaRoute() {
   const router = useRouter();
@@ -28,7 +31,7 @@ export default function DynamicSchemaRoute() {
 
   if (isLoading || !user) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
+      <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -36,7 +39,7 @@ export default function DynamicSchemaRoute() {
 
   if (schemasLoading) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
+      <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -44,7 +47,7 @@ export default function DynamicSchemaRoute() {
 
   if (!schema) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
+      <div className="flex h-[50vh] items-center justify-center">
         <p className="text-muted-foreground">Schema "{schemaName}" not found.</p>
       </div>
     );

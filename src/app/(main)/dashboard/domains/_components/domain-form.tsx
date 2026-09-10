@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -44,13 +45,28 @@ export function DomainFormDialog({ open, onOpenChange, domain }: DomainFormDialo
   const createMutation = useCreateContent("domains");
   const updateMutation = useUpdateContent("domains");
 
-  const { handleSubmit, reset, register, watch, setValue, formState: { errors } } = useForm<DomainFormValues>({
+  const {
+    handleSubmit,
+    reset,
+    register,
+    formState: { errors },
+  } = useForm<DomainFormValues>({
     resolver: zodResolver(domainSchema),
     defaultValues: {
-      name: "", slug: "", hostnames: "", default_locale: "vi",
-      logo: "", favicon: "", gtag_id: "", gtag_secret: "",
-      active: true, status: "active",
-      seo_title: "", seo_description: "", seo_keywords: "", theme: "",
+      name: "",
+      slug: "",
+      hostnames: "",
+      default_locale: "vi",
+      logo: "",
+      favicon: "",
+      gtag_id: "",
+      gtag_secret: "",
+      active: true,
+      status: "active",
+      seo_title: "",
+      seo_description: "",
+      seo_keywords: "",
+      theme: "",
     },
   });
 
@@ -73,14 +89,29 @@ export function DomainFormDialog({ open, onOpenChange, domain }: DomainFormDialo
         theme: String(domain.theme ?? ""),
       });
     } else if (open) {
-      reset({ name: "", slug: "", hostnames: "", default_locale: "vi", logo: "", favicon: "", gtag_id: "", gtag_secret: "", active: true, status: "active", seo_title: "", seo_description: "", seo_keywords: "", theme: "" });
+      reset({
+        name: "",
+        slug: "",
+        hostnames: "",
+        default_locale: "vi",
+        logo: "",
+        favicon: "",
+        gtag_id: "",
+        gtag_secret: "",
+        active: true,
+        status: "active",
+        seo_title: "",
+        seo_description: "",
+        seo_keywords: "",
+        theme: "",
+      });
     }
   }, [open, domain, reset]);
 
   const onSubmit = (values: DomainFormValues) => {
     const payload = { ...values, active: !!values.active };
     if (isEdit) {
-      updateMutation.mutate({ id: domain!.id as number, data: payload }, { onSuccess: () => onOpenChange(false) });
+      updateMutation.mutate({ id: domain?.id as number, data: payload }, { onSuccess: () => onOpenChange(false) });
     } else {
       createMutation.mutate(payload, { onSuccess: () => onOpenChange(false) });
     }
@@ -99,18 +130,18 @@ export function DomainFormDialog({ open, onOpenChange, domain }: DomainFormDialo
             <div className="grid gap-2">
               <Label>Name</Label>
               <Input {...register("name")} />
-              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+              {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
             </div>
             <div className="grid gap-2">
               <Label>Slug</Label>
               <Input {...register("slug")} />
-              {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
+              {errors.slug && <p className="text-destructive text-xs">{errors.slug.message}</p>}
             </div>
           </div>
           <div className="grid gap-2">
             <Label>Hostnames</Label>
             <Input {...register("hostnames")} placeholder="example.com, www.example.com" />
-            {errors.hostnames && <p className="text-xs text-destructive">{errors.hostnames.message}</p>}
+            {errors.hostnames && <p className="text-destructive text-xs">{errors.hostnames.message}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
@@ -165,7 +196,9 @@ export function DomainFormDialog({ open, onOpenChange, domain }: DomainFormDialo
             <Input {...register("theme")} />
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEdit ? "Update" : "Create"}

@@ -52,7 +52,7 @@ function buildTree<T extends Record<string, unknown>>(
     const parentId = item[parentKey] != null ? String(item[parentKey]) : null;
     const node = map.get(id)!;
     // Coerce parentId to match map key type (API may return parent_id as string)
-    const normalizedParentId = parentId != null ? (typeof id === "number" ? Number(parentId) : String(parentId)) : null;
+    const normalizedParentId = parentId;
 
     if (normalizedParentId && map.has(normalizedParentId)) {
       map.get(normalizedParentId)!.children!.push(node);

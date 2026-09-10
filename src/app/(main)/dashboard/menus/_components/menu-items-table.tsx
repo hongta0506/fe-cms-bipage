@@ -23,11 +23,7 @@ interface MenuItem {
   status: string;
 }
 
-interface MenuItemsTableProps {
-  onAddItem: () => void;
-}
-
-export function MenuItemsTable({ onAddItem }: MenuItemsTableProps) {
+export function MenuItemsTable() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);

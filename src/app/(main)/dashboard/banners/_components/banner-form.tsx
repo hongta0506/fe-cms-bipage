@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,18 +45,14 @@ export function BannerFormDialog({ open, onOpenChange, banner }: BannerFormDialo
   const createMutation = useCreateContent("banners");
   const updateMutation = useUpdateContent("banners");
 
-  const { handleSubmit, register, reset, watch, setValue, formState: { errors } } = useForm<BannerFormValues>({
-    resolver: zodResolver(bannerSchema),
-    defaultValues: {
-      title: banner?.title ?? "",
-      key: banner?.key ?? "",
-      image: banner?.image ?? "",
-      link_url: banner?.link_url ?? "",
-      position: banner?.position ?? "",
-      sort_order: banner?.sort_order ?? 0,
-      active: banner?.active ?? true,
-    },
-  });
+  const {
+    handleSubmit,
+    register,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<BannerFormValues>({});
 
   useEffect(() => {
     if (open && banner) {
@@ -75,7 +71,7 @@ export function BannerFormDialog({ open, onOpenChange, banner }: BannerFormDialo
   }, [open, banner, reset]);
 
   const onSubmit = (values: BannerFormValues) => {
-    if (isEdit) {
+    if (banner) {
       updateMutation.mutate({ id: banner.id, data: values }, { onSuccess: () => onOpenChange(false) });
     } else {
       createMutation.mutate(values, { onSuccess: () => onOpenChange(false) });
@@ -86,23 +82,25 @@ export function BannerFormDialog({ open, onOpenChange, banner }: BannerFormDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>{isEdit ? "Edit Banner" : "New Banner"}</DialogTitle></DialogHeader>
+      <DialogContent className="max-h-[90vh] max-w-sm overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? "Edit Banner" : "New Banner"}</DialogTitle>
+        </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label>Title</Label>
             <Input {...register("title")} />
-            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+            {errors.title && <p className="text-destructive text-sm">{errors.title.message}</p>}
           </div>
           <div className="space-y-2">
             <Label>Key</Label>
             <Input {...register("key")} />
-            {errors.key && <p className="text-sm text-destructive">{errors.key.message}</p>}
+            {errors.key && <p className="text-destructive text-sm">{errors.key.message}</p>}
           </div>
           <div className="space-y-2">
             <Label>Image URL</Label>
             <Input {...register("image")} />
-            {errors.image && <p className="text-sm text-destructive">{errors.image.message}</p>}
+            {errors.image && <p className="text-destructive text-sm">{errors.image.message}</p>}
           </div>
           <div className="space-y-2">
             <Label>Link URL</Label>
@@ -121,7 +119,9 @@ export function BannerFormDialog({ open, onOpenChange, banner }: BannerFormDialo
             <Label>Active</Label>
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEdit ? "Update" : "Create"}

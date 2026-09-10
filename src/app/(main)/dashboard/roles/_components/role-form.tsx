@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/lib/api";
 import { useCreateContent, useUpdateContent } from "@/hooks/use-dashboard";
+import { api } from "@/lib/api";
+
 import { RolePermissions } from "./role-permissions";
 
 const roleSchema = z.object({
@@ -66,13 +68,15 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
     }
   }, [open, isEdit, role]);
 
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<RoleFormValues>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<RoleFormValues>({
     resolver: zodResolver(roleSchema),
-    defaultValues: {
-      name: role?.name ?? "",
-      description: role?.description ?? "",
-      root: role?.root ?? false,
-    },
   });
 
   useEffect(() => {
@@ -85,7 +89,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
 
   const handleToggle = (resource: string) => {
     setSelectedResources((prev) =>
-      prev.includes(resource) ? prev.filter((r) => r !== resource) : [...prev, resource]
+      prev.includes(resource) ? prev.filter((r) => r !== resource) : [...prev, resource],
     );
   };
 
@@ -93,9 +97,8 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
     setSelectedResources((prev) => {
       if (select) {
         return [...new Set([...prev, ...resources])];
-      } else {
-        return prev.filter((r) => !resources.includes(r));
       }
+      return prev.filter((r) => !resources.includes(r));
     });
   };
 
@@ -116,7 +119,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
         onSuccess: async () => {
           // Create new permission records
           const createPromises = toAdd.map((resource) =>
-            api.createContent("permission", { role_id: role.id, resource, value: "allow" })
+            api.createContent("permission", { role_id: role.id, resource, value: "allow" }),
           );
           // Delete removed permission records
           const deletePromises = toRemove.map((p) => api.deleteContent("permission", p.id));
@@ -124,7 +127,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
           await Promise.all([...createPromises, ...deletePromises]);
           onOpenChange(false);
         },
-      }
+      },
     );
   };
 
@@ -150,7 +153,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                   {...register("name")}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -159,7 +162,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                   {...register("description")}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+                {errors.description && <p className="text-destructive text-sm">{errors.description.message}</p>}
               </div>
               <div className="flex items-center space-x-2">
                 <input
@@ -171,30 +174,116 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                     setValue("root", checked);
                     if (checked) {
                       setSelectedResources([
-                        "auth.me", "auth.login", "auth.register", "auth.logout", "auth.refresh", "auth.forgot_password", "auth.reset_password", "auth.verify_email", "auth.change_password", "auth.revoke_all",
-                        "schema.list", "schema.get", "schema.create", "schema.update", "schema.delete", "schema.truncate", "schema.import",
+                        "auth.me",
+                        "auth.login",
+                        "auth.register",
+                        "auth.logout",
+                        "auth.refresh",
+                        "auth.forgot_password",
+                        "auth.reset_password",
+                        "auth.verify_email",
+                        "auth.change_password",
+                        "auth.revoke_all",
+                        "schema.list",
+                        "schema.get",
+                        "schema.create",
+                        "schema.update",
+                        "schema.delete",
+                        "schema.truncate",
+                        "schema.import",
                         "realtime.listen",
-                        "role.list", "role.get", "role.create", "role.update", "role.delete",
-                        "file.list", "file.upload",
+                        "role.list",
+                        "role.get",
+                        "role.create",
+                        "role.update",
+                        "role.delete",
+                        "file.list",
+                        "file.upload",
                         "tool.generate",
-                        "config.get", "config.update",
-                        "permission.list", "permission.get", "permission.create", "permission.update", "permission.delete",
-                        "category.list", "category.get", "category.create", "category.update", "category.delete",
-                        "tag.list", "tag.get", "tag.create", "tag.update", "tag.delete",
-                        "menu.list", "menu.get", "menu.create", "menu.update", "menu.delete",
-                        "menu_item.list", "menu_item.get", "menu_item.create", "menu_item.update", "menu_item.delete",
-                        "domain.list", "domain.get", "domain.create", "domain.update", "domain.delete",
-                        "setting.list", "setting.get", "setting.create", "setting.update", "setting.delete",
-                        "user.list", "user.get", "user.create", "user.update", "user.delete",
-                        "session.list", "session.get", "session.create", "session.update", "session.delete",
-                        "author.list", "author.get", "author.create", "author.update", "author.delete",
-                        "banner.list", "banner.get", "banner.create", "banner.update", "banner.delete",
-                        "block.list", "block.get", "block.create", "block.update", "block.delete",
-                        "contact_submission.list", "contact_submission.get", "contact_submission.create", "contact_submission.update", "contact_submission.delete",
-                        "crawl_source.list", "crawl_source.get", "crawl_source.create", "crawl_source.update", "crawl_source.delete",
-                        "post.list", "post.get", "post.create", "post.update", "post.delete",
-                        "file.list", "file.get", "file.create", "file.update", "file.delete",
-                        "docs.spec", "docs.viewer",
+                        "config.get",
+                        "config.update",
+                        "permission.list",
+                        "permission.get",
+                        "permission.create",
+                        "permission.update",
+                        "permission.delete",
+                        "category.list",
+                        "category.get",
+                        "category.create",
+                        "category.update",
+                        "category.delete",
+                        "tag.list",
+                        "tag.get",
+                        "tag.create",
+                        "tag.update",
+                        "tag.delete",
+                        "menu.list",
+                        "menu.get",
+                        "menu.create",
+                        "menu.update",
+                        "menu.delete",
+                        "menu_item.list",
+                        "menu_item.get",
+                        "menu_item.create",
+                        "menu_item.update",
+                        "menu_item.delete",
+                        "domain.list",
+                        "domain.get",
+                        "domain.create",
+                        "domain.update",
+                        "domain.delete",
+                        "setting.list",
+                        "setting.get",
+                        "setting.create",
+                        "setting.update",
+                        "setting.delete",
+                        "user.list",
+                        "user.get",
+                        "user.create",
+                        "user.update",
+                        "user.delete",
+                        "session.list",
+                        "session.get",
+                        "session.create",
+                        "session.update",
+                        "session.delete",
+                        "author.list",
+                        "author.get",
+                        "author.create",
+                        "author.update",
+                        "author.delete",
+                        "banner.list",
+                        "banner.get",
+                        "banner.create",
+                        "banner.update",
+                        "banner.delete",
+                        "block.list",
+                        "block.get",
+                        "block.create",
+                        "block.update",
+                        "block.delete",
+                        "contact_submission.list",
+                        "contact_submission.get",
+                        "contact_submission.create",
+                        "contact_submission.update",
+                        "contact_submission.delete",
+                        "crawl_source.list",
+                        "crawl_source.get",
+                        "crawl_source.create",
+                        "crawl_source.update",
+                        "crawl_source.delete",
+                        "post.list",
+                        "post.get",
+                        "post.create",
+                        "post.update",
+                        "post.delete",
+                        "file.list",
+                        "file.get",
+                        "file.create",
+                        "file.update",
+                        "file.delete",
+                        "docs.spec",
+                        "docs.viewer",
                       ]);
                     } else {
                       setSelectedResources([]);
@@ -202,7 +291,10 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                   }}
                   className="h-4 w-4 rounded border-input"
                 />
-                <Label htmlFor="root" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <Label
+                  htmlFor="root"
+                  className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   Root (Full Access)
                 </Label>
               </div>
@@ -211,11 +303,15 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
           <TabsContent value="permissions">
             <div className="py-4">
               {loadingPerms ? (
-                <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+                <div className="flex items-center justify-center py-8 text-muted-foreground text-sm">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading permissions...
                 </div>
               ) : (
-                <RolePermissions selectedResources={selectedResources} onToggle={handleToggle} onToggleGroup={handleToggleGroup} />
+                <RolePermissions
+                  selectedResources={selectedResources}
+                  onToggle={handleToggle}
+                  onToggleGroup={handleToggleGroup}
+                />
               )}
             </div>
           </TabsContent>

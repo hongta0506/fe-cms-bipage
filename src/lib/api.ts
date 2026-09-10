@@ -77,7 +77,7 @@ class ApiClient {
       const existingFilterStr = params.get("filter");
       let existingFilter: Record<string, unknown> = {};
       if (existingFilterStr) {
-        try { existingFilter = JSON.parse(existingFilterStr); } catch {}
+        try { existingFilter = JSON.parse(existingFilterStr); } catch { /* ignore malformed filter */ }
       }
       params.set("filter", JSON.stringify({ ...existingFilter, ...searchFilter }));
     }

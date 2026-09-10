@@ -36,6 +36,7 @@ export const useAuthStore = create<AuthState>()(
           const { token } = await api.login(login, password);
           api.setToken(token);
           const user = await api.getMe();
+          // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
           document.cookie = `auth-token=${token}; path=/; max-age=86400`;
           set({ user, token, isLoading: false });
         } catch (err) {
@@ -47,6 +48,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         api.setToken(null);
+        // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
         document.cookie = "auth-token=; path=/; max-age=0";
         set({ user: null, token: null });
       },
@@ -60,6 +62,7 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true });
           try {
             const user = await api.getMe();
+            // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
             document.cookie = `auth-token=${defaultToken}; path=/; max-age=86400`;
             set({ user, token: defaultToken, isLoading: false });
           } catch {
@@ -69,6 +72,7 @@ export const useAuthStore = create<AuthState>()(
           return;
         }
         api.setToken(token);
+        // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
         document.cookie = `auth-token=${token}; path=/; max-age=86400`;
         set({ isLoading: true });
         try {
@@ -76,6 +80,7 @@ export const useAuthStore = create<AuthState>()(
           set({ user, isLoading: false });
         } catch {
           api.setToken(null);
+          // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
           document.cookie = "auth-token=; path=/; max-age=0";
           set({ user: null, token: null, isLoading: false });
         }

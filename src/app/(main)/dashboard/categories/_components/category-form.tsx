@@ -103,7 +103,7 @@ export function CategoryFormDialog({ open, onOpenChange, category, categories = 
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                register("name").onChange(e);
+                void register("name").onChange(e);
               }}
             />
             {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}

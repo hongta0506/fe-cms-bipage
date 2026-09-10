@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
+
 import { Loader2 } from "lucide-react";
-import { useAuthStore } from "@/stores/auth/auth-store";
-import { Button } from "@/components/ui/button";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuthStore } from "@/stores/auth/auth-store";
 
 export default function ProfilePage() {
   const router = useRouter();
   const isLoading = useAuthStore((s) => s.isLoading);
   const user = useAuthStore((s) => s.user);
-  const [saving, setSaving] = useState(false);
+  const [_saving, _setSaving] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
@@ -21,7 +23,7 @@ export default function ProfilePage() {
 
   if (isLoading || !user) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
+      <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -29,7 +31,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <h2 className="text-2xl font-bold">Profile</h2>
+      <h2 className="font-bold text-2xl">Profile</h2>
       <Card className="max-w-lg">
         <CardHeader>
           <CardTitle>Account Info</CardTitle>
@@ -47,9 +49,7 @@ export default function ProfilePage() {
             <Label>Name</Label>
             <Input value={user.name} disabled />
           </div>
-          <p className="text-sm text-muted-foreground">
-            Profile editing is managed through the Users section.
-          </p>
+          <p className="text-muted-foreground text-sm">Profile editing is managed through the Users section.</p>
         </CardContent>
       </Card>
     </div>

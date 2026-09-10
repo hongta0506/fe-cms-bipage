@@ -110,5 +110,6 @@ export function ThemeBootScript() {
     })();
   `;
 
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: inline boot script prevents theme flash before hydration
   return <Script id="theme-boot" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: code }} />;
 }

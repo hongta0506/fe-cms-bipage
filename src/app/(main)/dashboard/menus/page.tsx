@@ -40,7 +40,7 @@ export default function MenusPage() {
   const [editItem, setEditItem] = useState<MenuItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<MenuItem | null>(null);
 
-  const { data, isLoading: itemsLoading } = useContentAll("menu_items", { pageSize: 1000 });
+  const { data } = useContentAll("menu_items", { pageSize: 1000 });
   const deleteMutation = useDeleteContent("menu_items");
 
   const items = (data?.items ?? []) as MenuItem[];
@@ -89,7 +89,7 @@ export default function MenusPage() {
       </div>
 
       {view === "table" ? (
-        <MenuItemsTable onAddItem={() => setShowItemForm(true)} />
+        <MenuItemsTable />
       ) : (
         <TreeView
           data={treeData}
@@ -118,7 +118,11 @@ export default function MenusPage() {
 
       <MenuItemFormDialog open={showItemForm} onOpenChange={setShowItemForm} />
       {editItem && (
-        <MenuItemFormDialog open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} item={editItem as any} />
+        <MenuItemFormDialog
+          open={!!editItem}
+          onOpenChange={(o) => !o && setEditItem(null)}
+          item={{ ...editItem, status: String(editItem.status) }}
+        />
       )}
       {deleteItem && (
         <MenuItemDeleteDialog

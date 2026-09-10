@@ -25,11 +25,13 @@ export function CrawlSourceDeleteDialog({ open, onOpenChange, item }: Props) {
         <DialogHeader>
           <DialogTitle>Delete Crawl Source</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Are you sure you want to delete <strong>{item.name}</strong>?
         </p>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
             {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Delete

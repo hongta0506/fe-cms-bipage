@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -29,10 +29,12 @@ export function AuthorFormDialog({ open, onOpenChange, author }: AuthorFormDialo
   const createMutation = useCreateContent("authors");
   const updateMutation = useUpdateContent("authors");
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<AuthorFormValues>({
-    resolver: zodResolver(authorSchema),
-    defaultValues: { username: author?.username ?? "", display_name: author?.display_name ?? "" },
-  });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AuthorFormValues>({});
 
   useEffect(() => {
     if (open && author) {
@@ -43,7 +45,7 @@ export function AuthorFormDialog({ open, onOpenChange, author }: AuthorFormDialo
   }, [open, author, reset]);
 
   const onSubmit = (values: AuthorFormValues) => {
-    if (isEdit) {
+    if (author) {
       updateMutation.mutate({ id: author.id, data: values }, { onSuccess: () => onOpenChange(false) });
     } else {
       createMutation.mutate(values, { onSuccess: () => onOpenChange(false) });
@@ -55,20 +57,30 @@ export function AuthorFormDialog({ open, onOpenChange, author }: AuthorFormDialo
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
-        <DialogHeader><DialogTitle>{isEdit ? "Edit Author" : "New Author"}</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{isEdit ? "Edit Author" : "New Author"}</DialogTitle>
+        </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label>Username</Label>
-            <input className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm" {...register("username")} />
-            {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
+            <input
+              className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm"
+              {...register("username")}
+            />
+            {errors.username && <p className="text-destructive text-sm">{errors.username.message}</p>}
           </div>
           <div className="space-y-2">
             <Label>Display Name</Label>
-            <input className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm" {...register("display_name")} />
-            {errors.display_name && <p className="text-sm text-destructive">{errors.display_name.message}</p>}
+            <input
+              className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm"
+              {...register("display_name")}
+            />
+            {errors.display_name && <p className="text-destructive text-sm">{errors.display_name.message}</p>}
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEdit ? "Update" : "Create"}

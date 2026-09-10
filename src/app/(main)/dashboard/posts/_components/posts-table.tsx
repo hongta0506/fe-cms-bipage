@@ -92,6 +92,7 @@ export function PostsTable() {
       cell: ({ row }) => (
         <div className="flex h-10 w-16 items-center justify-center overflow-hidden rounded bg-muted">
           {row.original.cover_image ? (
+            // biome-ignore lint/performance/noImgElement: dynamic CMS image hosts cannot be statically whitelisted
             <img src={row.original.cover_image} alt="" className="h-full w-full object-cover" />
           ) : (
             <span className="text-[10px] text-muted-foreground">No img</span>
@@ -205,7 +206,9 @@ export function PostsTable() {
             variant="outline"
             disabled={updateMutation.isPending}
             onClick={() => {
-              selectedPosts.forEach((p) => updateMutation.mutate({ id: p.id, data: { status: "published" } }));
+              selectedPosts.forEach((p) => {
+                updateMutation.mutate({ id: p.id, data: { status: "published" } });
+              });
               setSelectedPosts([]);
             }}
           >
@@ -216,7 +219,9 @@ export function PostsTable() {
             variant="outline"
             disabled={updateMutation.isPending}
             onClick={() => {
-              selectedPosts.forEach((p) => updateMutation.mutate({ id: p.id, data: { status: "draft" } }));
+              selectedPosts.forEach((p) => {
+                updateMutation.mutate({ id: p.id, data: { status: "draft" } });
+              });
               setSelectedPosts([]);
             }}
           >
@@ -227,7 +232,9 @@ export function PostsTable() {
             variant="destructive"
             disabled={deleteMutation.isPending}
             onClick={() => {
-              selectedPosts.forEach((p) => deleteMutation.mutate(p.id));
+              selectedPosts.forEach((p) => {
+                deleteMutation.mutate(p.id);
+              });
               setSelectedPosts([]);
             }}
           >
