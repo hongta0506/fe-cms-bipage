@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -65,11 +65,14 @@ export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps
 
   useEffect(() => {
     if (!open) return;
-    api.getContent("posts", { pageSize: 1000 }).then((res) => {
-      const items = res.items as { slug: string; id: number }[];
-      const currentId = post?.id as number | undefined;
-      setExistingSlugs(new Set(items.filter((item) => item.id !== currentId).map((item) => item.slug)));
-    }).catch(() => setExistingSlugs(new Set()));
+    api
+      .getContent("posts", { pageSize: 1000 })
+      .then((res) => {
+        const items = res.items as { slug: string; id: number }[];
+        const currentId = post?.id as number | undefined;
+        setExistingSlugs(new Set(items.filter((item) => item.id !== currentId).map((item) => item.slug)));
+      })
+      .catch(() => setExistingSlugs(new Set()));
   }, [open, post?.id]);
 
   const { data: authorsData } = useContentAll("authors", { pageSize: 100 });
@@ -166,7 +169,11 @@ export function PostFormDialog({ open, onOpenChange, post }: PostFormDialogProps
             {errors.title && <p className="text-destructive text-sm">{errors.title.message}</p>}
           </div>
 
-          <SlugInput title={title} value={watch("slug") as string} onChange={(v) => setValue("slug", toUniqueSlug(v, existingSlugs))} />
+          <SlugInput
+            title={title}
+            value={watch("slug") as string}
+            onChange={(v) => setValue("slug", toUniqueSlug(v, existingSlugs))}
+          />
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">

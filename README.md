@@ -1,5 +1,9 @@
 # Next.js Admin Template with TypeScript & Shadcn UI
 
+## Bipage delivery tracking
+
+Cross-repository work is tracked in [`hongta0506/xskt24h-docs` Issues](https://github.com/hongta0506/xskt24h-docs/issues) and GitHub Project [`xskt24h Platform`](https://github.com/users/hongta0506/projects/8). Reward-engine architecture and delivery specs live under `xskt24h-docs/docs/projects/nakama-reward-engine/`.
+
 **Studio Admin** - Includes multiple dashboards, authentication layouts, customizable theme presets, and more.
 
 <img src="https://github.com/arhamkhnz/next-shadcn-admin-dashboard/blob/main/media/dashboard.png?version=5" alt="Dashboard Screenshot">

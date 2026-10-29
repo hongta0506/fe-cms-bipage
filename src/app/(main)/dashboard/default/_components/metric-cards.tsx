@@ -1,8 +1,8 @@
 "use client";
 
-import { useStats, useContentCount } from "@/hooks/use-dashboard";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useContentCount, useStats } from "@/hooks/use-dashboard";
 
 function MetricCardSkeleton() {
   return (
@@ -12,7 +12,7 @@ function MetricCardSkeleton() {
         <Skeleton className="h-4 w-8" />
       </CardHeader>
       <CardContent>
-        <Skeleton className="h-7 w-[60px] mb-1" />
+        <Skeleton className="mb-1 h-7 w-[60px]" />
         <Skeleton className="h-3 w-[120px]" />
       </CardContent>
     </Card>
@@ -30,8 +30,8 @@ export function MetricCards() {
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <MetricCardSkeleton key={i} />
+        {["posts", "categories", "tags", "users"].map((metric) => (
+          <MetricCardSkeleton key={metric} />
         ))}
       </div>
     );
@@ -65,11 +65,11 @@ export function MetricCards() {
       {cards.map((card) => (
         <Card key={card.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+            <CardTitle className="font-medium text-sm">{card.title}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{card.value.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">{card.description}</p>
+            <div className="font-bold text-2xl">{card.value.toLocaleString()}</div>
+            <p className="text-muted-foreground text-xs">{card.description}</p>
           </CardContent>
         </Card>
       ))}

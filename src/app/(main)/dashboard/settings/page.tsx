@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,13 +31,18 @@ export default function SettingsPage() {
   const user = useAuthStore((s) => s.user);
   const [editItem, setEditItem] = useState<Setting | null>(null);
   const [deleteItem, setDeleteItem] = useState<Setting | null>(null);
-  const [groupFilter, setGroupFilter] = useState<string>("all");
+  const [groupFilter, _setGroupFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const deleteMutation = useDeleteContent("settings");
 
-  const { data, isLoading: contentLoading } = useContentAll("settings", { page, pageSize: 500, search, searchField: "key" });
+  const { data, isLoading: contentLoading } = useContentAll("settings", {
+    page,
+    pageSize: 500,
+    search,
+    searchField: "key",
+  });
   const allItems = (data?.items ?? []) as Setting[];
   const items = groupFilter === "all" ? allItems : allItems.filter((i) => i.group === groupFilter);
   const total = items.length;
@@ -94,7 +99,10 @@ export default function SettingsPage() {
         isLoading={contentLoading}
         searchKey="key"
         searchPlaceholder="Search by key..."
-        onSearch={(s) => { setSearch(s); setPage(1); }}
+        onSearch={(s) => {
+          setSearch(s);
+          setPage(1);
+        }}
         filters={[{ key: "group", label: "Group", options: groups.map((g) => ({ label: g, value: g })) }]}
         total={total}
         pageSize={pageSize}
@@ -113,12 +121,18 @@ export default function SettingsPage() {
             <DialogHeader>
               <DialogTitle>Delete Setting</DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Are you sure you want to delete <strong>{deleteItem.key}</strong>?
             </p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteItem(null)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => deleteMutation.mutate(deleteItem.id, { onSuccess: () => setDeleteItem(null) })} disabled={deleteMutation.isPending}>
+              <Button variant="outline" onClick={() => setDeleteItem(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteMutation.mutate(deleteItem.id, { onSuccess: () => setDeleteItem(null) })}
+                disabled={deleteMutation.isPending}
+              >
                 {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Delete
               </Button>

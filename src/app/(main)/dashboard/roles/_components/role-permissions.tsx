@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 // Static permission resource tree — all available API endpoints
 const PERMISSION_TREE: { group: string; resources: string[] }[] = [
@@ -40,13 +39,7 @@ const PERMISSION_TREE: { group: string; resources: string[] }[] = [
   },
   {
     group: "Role",
-    resources: [
-      "api.role.list",
-      "api.role.detail",
-      "api.role.create",
-      "api.role.update",
-      "api.role.delete",
-    ],
+    resources: ["api.role.list", "api.role.detail", "api.role.create", "api.role.update", "api.role.delete"],
   },
   {
     group: "File",
@@ -251,7 +244,7 @@ export function RolePermissions({ selectedResources, onToggle, onToggleGroup }: 
   };
 
   return (
-    <div className="max-h-[400px] overflow-y-auto space-y-1">
+    <div className="max-h-[400px] space-y-1 overflow-y-auto">
       {PERMISSION_TREE.map(({ group, resources }) => {
         const selectedCount = resources.filter((r) => selectedResources.includes(r)).length;
         const allSelected = selectedCount === resources.length;
@@ -259,33 +252,43 @@ export function RolePermissions({ selectedResources, onToggle, onToggleGroup }: 
         const isExpanded = expanded[group] ?? false;
 
         return (
-          <div key={group} className="border rounded-md">
+          <div key={group} className="rounded-md border">
             <div className="flex items-center gap-2 px-3 py-2 hover:bg-muted/50">
-              <span className="cursor-pointer" onClick={() => toggleGroup(group)}>
+              <button type="button" className="cursor-pointer" onClick={() => toggleGroup(group)}>
                 {isExpanded ? (
                   <ChevronDown className="h-4 w-4 shrink-0" />
                 ) : (
                   <ChevronRight className="h-4 w-4 shrink-0" />
                 )}
-              </span>
+              </button>
               <input
                 type="checkbox"
-                ref={(el) => { if (el) el.indeterminate = someSelected; }}
+                ref={(el) => {
+                  if (el) el.indeterminate = someSelected;
+                }}
                 checked={allSelected}
                 onChange={() => toggleAllInGroup(resources)}
                 className="h-4 w-4 rounded border-input"
               />
-              <span className="text-sm font-medium flex-1 cursor-pointer" onClick={() => toggleGroup(group)}>
+              <button
+                type="button"
+                className="flex-1 cursor-pointer text-left font-medium text-sm"
+                onClick={() => toggleGroup(group)}
+              >
                 {group}
-              </span>
-              <span className="text-xs text-muted-foreground cursor-pointer" onClick={() => toggleGroup(group)}>
+              </button>
+              <button
+                type="button"
+                className="cursor-pointer text-muted-foreground text-xs"
+                onClick={() => toggleGroup(group)}
+              >
                 {selectedCount}/{resources.length}
-              </span>
+              </button>
             </div>
             {isExpanded && (
-              <div className="border-t px-3 py-2 space-y-1">
+              <div className="space-y-1 border-t px-3 py-2">
                 {resources.map((resource) => (
-                  <label key={resource} className="flex items-center gap-2 cursor-pointer py-0.5">
+                  <label key={resource} className="flex cursor-pointer items-center gap-2 py-0.5">
                     <input
                       type="checkbox"
                       checked={selectedResources.includes(resource)}

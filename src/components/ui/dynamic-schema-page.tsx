@@ -40,7 +40,7 @@ interface SchemaField {
 
 interface SchemaDef {
   name: string;
-  label: string;
+  label?: string;
   icon?: string;
   fields: SchemaField[];
 }
@@ -305,6 +305,7 @@ export function DynamicSchemaPage({ schema }: { schema: SchemaDef }) {
 
   const { data, isLoading } = useContent(schema.name, { page, pageSize });
   const deleteMutation = useDeleteContent(schema.name);
+  const label = schema.label || schema.name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   const items = useMemo(() => (data?.items ?? []) as Record<string, unknown>[], [data]);
 
@@ -352,10 +353,10 @@ export function DynamicSchemaPage({ schema }: { schema: SchemaDef }) {
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">{schema.label}</h2>
+        <h2 className="text-2xl font-bold">{label}</h2>
         <Button onClick={() => setShowCreate(true)}>
           <Loader2 className="mr-2 h-4 w-4 hidden" />
-          New {schema.label.replace(/s$/, "")}
+          New {label.replace(/s$/, "")}
         </Button>
       </div>
 
@@ -364,7 +365,7 @@ export function DynamicSchemaPage({ schema }: { schema: SchemaDef }) {
         data={items}
         isLoading={isLoading}
         searchKey={searchKey}
-        searchPlaceholder={`Tìm ${schema.label.toLowerCase()}...`}
+        searchPlaceholder={`Tìm ${label.toLowerCase()}...`}
         total={data?.total ?? 0}
         pageSize={pageSize}
         onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
@@ -374,7 +375,7 @@ export function DynamicSchemaPage({ schema }: { schema: SchemaDef }) {
       {/* Create dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent style={{ maxWidth: "800px" }} className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>New {schema.label.replace(/s$/, "")}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>New {label.replace(/s$/, "")}</DialogTitle></DialogHeader>
           <DynamicForm schema={schema} onOpenChange={setShowCreate} onSuccess={() => setShowCreate(false)} />
         </DialogContent>
       </Dialog>
@@ -383,7 +384,7 @@ export function DynamicSchemaPage({ schema }: { schema: SchemaDef }) {
       {editItem && (
         <Dialog open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)}>
           <DialogContent style={{ maxWidth: "800px" }} className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Edit {schema.label.replace(/s$/, "")}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Edit {label.replace(/s$/, "")}</DialogTitle></DialogHeader>
             <DynamicForm schema={schema} item={editItem} onOpenChange={(o) => !o && setEditItem(null)} onSuccess={() => setEditItem(null)} />
           </DialogContent>
         </Dialog>

@@ -1,14 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
+
 import { Loader2, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth/auth-store";
 
-import { BannersTable } from "./_components/banners-table";
 import { BannerFormDialog } from "./_components/banner-form";
+import { BannersTable } from "./_components/banners-table";
 
 export default function BannersPage() {
   const router = useRouter();
@@ -22,7 +24,7 @@ export default function BannersPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
+      <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -31,7 +33,7 @@ export default function BannersPage() {
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Banners</h2>
+        <h2 className="font-bold text-2xl">Banners</h2>
         <Button onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New Banner

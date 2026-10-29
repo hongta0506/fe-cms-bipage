@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -28,7 +29,16 @@ type MenuItemFormValues = z.infer<typeof menuItemSchema>;
 interface MenuItemFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item?: { id: number; label: string; url: string; category_slug?: string; sort_order: number; parent_id: number | null; menu_id: number; status: string };
+  item?: {
+    id: number;
+    label: string;
+    url: string;
+    category_slug?: string;
+    sort_order: number;
+    parent_id: number | null;
+    menu_id: number;
+    status: string;
+  };
   items?: { id: number; label: string; parent_id?: number | null }[];
 }
 
@@ -37,9 +47,24 @@ export function MenuItemFormDialog({ open, onOpenChange, item, items = [] }: Men
   const createMutation = useCreateContent("menu_items");
   const updateMutation = useUpdateContent("menu_items");
 
-  const { handleSubmit, reset, setValue, watch, register, formState: { errors } } = useForm<MenuItemFormValues>({
+  const {
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    register,
+    formState: { errors },
+  } = useForm<MenuItemFormValues>({
     resolver: zodResolver(menuItemSchema),
-    defaultValues: { label: "", url: "", category_slug: "", sort_order: 0, parent_id: null, menu_id: 1, status: "active" },
+    defaultValues: {
+      label: "",
+      url: "",
+      category_slug: "",
+      sort_order: 0,
+      parent_id: null,
+      menu_id: 1,
+      status: "active",
+    },
   });
 
   useEffect(() => {
@@ -77,23 +102,40 @@ export function MenuItemFormDialog({ open, onOpenChange, item, items = [] }: Men
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-2">
           <div className="grid gap-2">
             <Label htmlFor="label">Label</Label>
-            <input id="label" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" {...register("label")} />
-            {errors.label && <p className="text-xs text-destructive">{errors.label.message}</p>}
+            <input
+              id="label"
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              {...register("label")}
+            />
+            {errors.label && <p className="text-destructive text-xs">{errors.label.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="url">URL</Label>
-            <input id="url" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" {...register("url")} />
-            {errors.url && <p className="text-xs text-destructive">{errors.url.message}</p>}
+            <input
+              id="url"
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              {...register("url")}
+            />
+            {errors.url && <p className="text-destructive text-xs">{errors.url.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="category_slug">Category Slug</Label>
-            <input id="category_slug" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" {...register("category_slug")} />
-            {errors.category_slug && <p className="text-xs text-destructive">{errors.category_slug.message}</p>}
+            <input
+              id="category_slug"
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              {...register("category_slug")}
+            />
+            {errors.category_slug && <p className="text-destructive text-xs">{errors.category_slug.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="sort_order">Sort Order</Label>
-            <input id="sort_order" type="number" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" {...register("sort_order", { valueAsNumber: true })} />
-            {errors.sort_order && <p className="text-xs text-destructive">{errors.sort_order.message}</p>}
+            <input
+              id="sort_order"
+              type="number"
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              {...register("sort_order", { valueAsNumber: true })}
+            />
+            {errors.sort_order && <p className="text-destructive text-xs">{errors.sort_order.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label>Parent Item</Label>
@@ -110,23 +152,30 @@ export function MenuItemFormDialog({ open, onOpenChange, item, items = [] }: Men
                   </option>
                 ))}
             </NativeSelect>
-            {errors.parent_id && <p className="text-xs text-destructive">{errors.parent_id.message}</p>}
+            {errors.parent_id && <p className="text-destructive text-xs">{errors.parent_id.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="menu_id">Menu ID</Label>
-            <input id="menu_id" type="number" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" {...register("menu_id", { valueAsNumber: true })} />
-            {errors.menu_id && <p className="text-xs text-destructive">{errors.menu_id.message}</p>}
+            <input
+              id="menu_id"
+              type="number"
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              {...register("menu_id", { valueAsNumber: true })}
+            />
+            {errors.menu_id && <p className="text-destructive text-xs">{errors.menu_id.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label>Status</Label>
             <Select value={watch("status")} onValueChange={(v) => setValue("status", v as "active" | "inactive")}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            {errors.status && <p className="text-xs text-destructive">{errors.status.message}</p>}
+            {errors.status && <p className="text-destructive text-xs">{errors.status.message}</p>}
           </div>
           <div className="flex justify-end">
             <Button type="submit" disabled={isPending}>

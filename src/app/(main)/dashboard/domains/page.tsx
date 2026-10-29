@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useAuthStore } from "@/stores/auth/auth-store";
 import { useContentAll } from "@/hooks/use-dashboard";
+import { useAuthStore } from "@/stores/auth/auth-store";
+
 import { DomainDeleteDialog } from "./_components/domain-delete-dialog";
 import { DomainFormDialog } from "./_components/domain-form";
 
@@ -91,7 +94,7 @@ export default function DomainsPage() {
       <div className="flex items-center justify-between">
         <h2 className="font-bold text-2xl">Domains</h2>
         <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="h-4 w-4 mr-1" /> Add Domain
+          <Plus className="mr-1 h-4 w-4" /> Add Domain
         </Button>
       </div>
       <DataTable
@@ -100,15 +103,27 @@ export default function DomainsPage() {
         isLoading={contentLoading}
         searchKey="name"
         searchPlaceholder="Search by name..."
-        onSearch={(s) => { setSearch(s); setPage(1); }}
+        onSearch={(s) => {
+          setSearch(s);
+          setPage(1);
+        }}
         total={total}
         pageSize={pageSize}
-        onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onPaginationChange={(p) => setPage(p)}
       />
       <DomainFormDialog open={createOpen} onOpenChange={setCreateOpen} />
-      <DomainFormDialog open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} domain={(editItem as unknown as Record<string, unknown>) ?? undefined} />
-      {deleteItem && <DomainDeleteDialog open={!!deleteItem} onOpenChange={(o) => !o && setDeleteItem(null)} domain={deleteItem} />}
+      <DomainFormDialog
+        open={!!editItem}
+        onOpenChange={(o) => !o && setEditItem(null)}
+        domain={(editItem as unknown as Record<string, unknown>) ?? undefined}
+      />
+      {deleteItem && (
+        <DomainDeleteDialog open={!!deleteItem} onOpenChange={(o) => !o && setDeleteItem(null)} domain={deleteItem} />
+      )}
     </div>
   );
 }

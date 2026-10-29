@@ -9,8 +9,8 @@ export default function Loading() {
       </div>
       <div className="space-y-3">
         <Skeleton className="h-10 w-full" />
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
+        {Array.from({ length: 5 }, (_, index) => `file-row-${index}`).map((key) => (
+          <Skeleton key={key} className="h-12 w-full" />
         ))}
       </div>
     </div>

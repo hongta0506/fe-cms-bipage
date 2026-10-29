@@ -1,9 +1,9 @@
+import type { LucideIcon } from "lucide-react";
 import {
   BookOpen,
   Calendar,
   FileText,
   Fingerprint,
-  Gauge,
   Globe,
   ImageIcon,
   LayoutDashboard,
@@ -21,7 +21,6 @@ import {
   Users,
   Webhook,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 export type NavBadge = "new" | "soon";
 

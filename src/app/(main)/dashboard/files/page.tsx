@@ -61,9 +61,14 @@ export default function FilesPage() {
     { accessorKey: "type", header: "Type" },
     { accessorKey: "disk", header: "Disk" },
     { accessorKey: "size", header: "Size", cell: ({ row }) => formatSize(row.getValue("size") as number) },
-    { accessorKey: "created_at", header: "Created", cell: ({ row }) => formatDate(row.getValue("created_at") as string) },
     {
-      id: "actions", header: "Actions",
+      accessorKey: "created_at",
+      header: "Created",
+      cell: ({ row }) => formatDate(row.getValue("created_at") as string),
+    },
+    {
+      id: "actions",
+      header: "Actions",
       cell: ({ row }) => (
         <Button variant="ghost" size="sm" onClick={() => setDeleteItem(row.original)}>
           <Trash2 className="h-4 w-4" />
@@ -127,7 +132,10 @@ export default function FilesPage() {
         isLoading={contentLoading}
         searchKey="name"
         searchPlaceholder="Search by name..."
-        onSearch={(s) => { setSearch(s); setPage(1); }}
+        onSearch={(s) => {
+          setSearch(s);
+          setPage(1);
+        }}
         total={total}
         pageSize={pageSize}
         onPageSizeChange={(size) => {
@@ -142,12 +150,18 @@ export default function FilesPage() {
             <DialogHeader>
               <DialogTitle>Delete File</DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Are you sure you want to delete <strong>{deleteItem.name}</strong>?
             </p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteItem(null)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => deleteMutation.mutate(deleteItem.id, { onSuccess: () => setDeleteItem(null) })} disabled={deleteMutation.isPending}>
+              <Button variant="outline" onClick={() => setDeleteItem(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteMutation.mutate(deleteItem.id, { onSuccess: () => setDeleteItem(null) })}
+                disabled={deleteMutation.isPending}
+              >
                 {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Delete
               </Button>

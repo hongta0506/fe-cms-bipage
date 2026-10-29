@@ -30,6 +30,10 @@ const schemaIcons: Record<string, string> = {
   permission: "🔑",
   roles_users: "👥",
   post_views: "👁️",
+  reward_claim: "🎁",
+  reward_prize: "🏆",
+  reward_task: "📋",
+  reward_tier: "⭐",
 };
 
 // Human-readable labels

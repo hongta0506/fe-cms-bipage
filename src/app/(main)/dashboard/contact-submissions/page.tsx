@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import { Loader2, Trash2 } from "lucide-react";
 
@@ -28,7 +30,11 @@ interface ContactSubmission {
 function formatDate(dateStr: string) {
   if (!dateStr) return "-";
   return new Date(dateStr).toLocaleDateString("en-US", {
-    year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -46,7 +52,12 @@ export default function ContactSubmissionsPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/auth/v1/login");
   }, [isLoading, user, router]);
-  const { data, isLoading: contentLoading } = useContentAll("contact_submissions", { page, pageSize, search, searchField: "email" });
+  const { data, isLoading: contentLoading } = useContentAll("contact_submissions", {
+    page,
+    pageSize,
+    search,
+    searchField: "email",
+  });
 
   if (isLoading || !user) {
     return (
@@ -63,14 +74,16 @@ export default function ContactSubmissionsPage() {
     { accessorKey: "name", header: "Name" },
     { accessorKey: "email", header: "Email" },
     {
-      accessorKey: "message", header: "Message",
+      accessorKey: "message",
+      header: "Message",
       cell: ({ row }) => {
         const msg = row.getValue("message") as string;
         return <span title={msg}>{msg?.length > 60 ? `${msg.slice(0, 60)}...` : msg}</span>;
       },
     },
     {
-      accessorKey: "status", header: "Status",
+      accessorKey: "status",
+      header: "Status",
       cell: ({ row }) => {
         const s = row.getValue("status") as string;
         const v = s === "active" ? "default" : s === "pending" ? "secondary" : s === "spam" ? "destructive" : "outline";
@@ -78,14 +91,18 @@ export default function ContactSubmissionsPage() {
       },
     },
     {
-      accessorKey: "created_at", header: "Created",
+      accessorKey: "created_at",
+      header: "Created",
       cell: ({ row }) => formatDate(row.getValue("created_at") as string),
     },
     {
-      id: "actions", header: "Actions",
+      id: "actions",
+      header: "Actions",
       cell: ({ row }) => (
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setDetailItem(row.original)}>View</Button>
+          <Button variant="ghost" size="sm" onClick={() => setDetailItem(row.original)}>
+            View
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => setDeleteItem(row.original)}>
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -103,11 +120,28 @@ export default function ContactSubmissionsPage() {
         isLoading={contentLoading}
         searchKey="email"
         searchPlaceholder="Search by email..."
-        onSearch={(s) => { setSearch(s); setPage(1); }}
-        filters={[{ key: "status", label: "Status", options: [{ label: "Active", value: "active" }, { label: "Pending", value: "pending" }, { label: "Spam", value: "spam" }, { label: "Closed", value: "closed" }] }]}
+        onSearch={(s) => {
+          setSearch(s);
+          setPage(1);
+        }}
+        filters={[
+          {
+            key: "status",
+            label: "Status",
+            options: [
+              { label: "Active", value: "active" },
+              { label: "Pending", value: "pending" },
+              { label: "Spam", value: "spam" },
+              { label: "Closed", value: "closed" },
+            ],
+          },
+        ]}
         total={total}
         pageSize={pageSize}
-        onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onPaginationChange={(p) => setPage(p)}
       />
       {detailItem && (
@@ -116,11 +150,21 @@ export default function ContactSubmissionsPage() {
       {deleteItem && (
         <Dialog open={!!deleteItem} onOpenChange={(o) => !o && setDeleteItem(null)}>
           <DialogContent className="max-w-sm">
-            <DialogHeader><DialogTitle>Delete Submission</DialogTitle></DialogHeader>
-            <p className="text-sm text-muted-foreground">Delete submission from <strong>{deleteItem.name}</strong>?</p>
+            <DialogHeader>
+              <DialogTitle>Delete Submission</DialogTitle>
+            </DialogHeader>
+            <p className="text-muted-foreground text-sm">
+              Delete submission from <strong>{deleteItem.name}</strong>?
+            </p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteItem(null)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => deleteMutation.mutate(deleteItem.id, { onSuccess: () => setDeleteItem(null) })} disabled={deleteMutation.isPending}>
+              <Button variant="outline" onClick={() => setDeleteItem(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteMutation.mutate(deleteItem.id, { onSuccess: () => setDeleteItem(null) })}
+                disabled={deleteMutation.isPending}
+              >
                 {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Delete
               </Button>
             </div>
@@ -131,7 +175,15 @@ export default function ContactSubmissionsPage() {
   );
 }
 
-function ContactDetailDialog({ open, onOpenChange, item }: { open: boolean; onOpenChange: (o: boolean) => void; item: ContactSubmission }) {
+function ContactDetailDialog({
+  open,
+  onOpenChange,
+  item,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  item: ContactSubmission;
+}) {
   const updateMutation = useUpdateContent("contact_submissions");
   const [status, setStatus] = useState(item.status);
 
@@ -142,21 +194,35 @@ function ContactDetailDialog({ open, onOpenChange, item }: { open: boolean; onOp
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Contact Submission #{item.id}</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Contact Submission #{item.id}</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3 text-sm">
           <div className="grid grid-cols-2 gap-2">
-            <div><span className="font-medium">Name:</span> {item.name}</div>
-            <div><span className="font-medium">Email:</span> {item.email}</div>
-            <div><span className="font-medium">IP:</span> {item.ip}</div>
-            <div><span className="font-medium">Domain:</span> {item.domain_slug}</div>
-            <div><span className="font-medium">Locale:</span> {item.locale}</div>
-            <div><span className="font-medium">Created:</span> {formatDate(item.created_at)}</div>
+            <div>
+              <span className="font-medium">Name:</span> {item.name}
+            </div>
+            <div>
+              <span className="font-medium">Email:</span> {item.email}
+            </div>
+            <div>
+              <span className="font-medium">IP:</span> {item.ip}
+            </div>
+            <div>
+              <span className="font-medium">Domain:</span> {item.domain_slug}
+            </div>
+            <div>
+              <span className="font-medium">Locale:</span> {item.locale}
+            </div>
+            <div>
+              <span className="font-medium">Created:</span> {formatDate(item.created_at)}
+            </div>
           </div>
           <div>
             <span className="font-medium">Message:</span>
             <p className="mt-1 whitespace-pre-wrap text-muted-foreground">{item.message}</p>
           </div>
-          <div className="flex items-center gap-3 pt-2 border-t">
+          <div className="flex items-center gap-3 border-t pt-2">
             <span className="font-medium">Status:</span>
             <NativeSelect value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="pending">Pending</option>
@@ -164,7 +230,11 @@ function ContactDetailDialog({ open, onOpenChange, item }: { open: boolean; onOp
               <option value="spam">Spam</option>
               <option value="closed">Closed</option>
             </NativeSelect>
-            <Button size="sm" onClick={handleStatusChange} disabled={updateMutation.isPending || status === item.status}>
+            <Button
+              size="sm"
+              onClick={handleStatusChange}
+              disabled={updateMutation.isPending || status === item.status}
+            >
               {updateMutation.isPending && <Loader2 className="mr-2 h-3 w-3 animate-spin" />} Update
             </Button>
           </div>
