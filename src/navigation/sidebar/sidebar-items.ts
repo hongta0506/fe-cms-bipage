@@ -1,9 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Award,
   BookOpen,
   Calendar,
+  Dices,
   FileText,
   Fingerprint,
+  Gift,
   Globe,
   ImageIcon,
   LayoutDashboard,
@@ -16,8 +19,10 @@ import {
   Server,
   Settings,
   Shield,
+  Sparkles,
   SquareArrowUpRight,
   Tag,
+  Trophy,
   Users,
   Webhook,
 } from "lucide-react";
@@ -177,6 +182,48 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 4,
+    label: "Rewards & Nakama",
+    items: [
+      {
+        id: "reward-prizes",
+        title: "Prizes & Matrix",
+        url: "/dashboard/rewards/prizes",
+        icon: Gift,
+      },
+      {
+        id: "reward-publish",
+        title: "Publish Config",
+        url: "/dashboard/rewards/publish",
+        icon: Sparkles,
+      },
+      {
+        id: "reward-players",
+        title: "Players & Points",
+        url: "/dashboard/rewards/players",
+        icon: Users,
+      },
+      {
+        id: "reward-spins",
+        title: "Spin History",
+        url: "/dashboard/rewards/spins",
+        icon: Dices,
+      },
+      {
+        id: "reward-claims",
+        title: "Reward Claims",
+        url: "/dashboard/rewards/claims",
+        icon: Award,
+      },
+      {
+        id: "reward-leaderboards",
+        title: "Leaderboards",
+        url: "/dashboard/rewards/leaderboards",
+        icon: Trophy,
+      },
+    ],
+  },
+  {
+    id: 5,
     label: "Pages",
     items: [
       {
@@ -209,7 +256,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     label: "Legacy",
     items: [
       {

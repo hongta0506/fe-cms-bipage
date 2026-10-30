@@ -29,6 +29,10 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# OpenClaude / dev tools
+.openclaude/
+
+
 # vercel
 .vercel
 
