@@ -138,3 +138,106 @@ export async function rollbackRewardConfig(version: number): Promise<{ version: 
 
   return { version: result.version, hash: result.hash };
 }
+
+// ── Extended Admin Nakama RPCs ─────────────────────────────────────────────────
+
+export interface AdminSpinRecord {
+  postingId: string;
+  playerId: string;
+  amount: number;
+  metadata: {
+    prizeId?: string;
+    prizeName?: string;
+    tierId?: string;
+    spinCost?: number;
+    pointsAwarded?: number;
+  };
+  createdAt: number;
+}
+
+export interface SpinsListResponse {
+  contractVersion: string;
+  total: number;
+  spins: AdminSpinRecord[];
+}
+
+export async function listSpinsAdmin(limit = 50, offset = 0, playerId?: string): Promise<SpinsListResponse> {
+  await assertFastSchemaAdmin();
+  return nakamaRpc<SpinsListResponse>("reward_spins_list_admin_v1", { limit, offset, playerId: playerId || undefined });
+}
+
+export interface PlayerAdminResponse {
+  contractVersion: string;
+  playerId: string;
+  balance: number;
+  version: number;
+  referralCode: string;
+  recentLedger: Array<{
+    postingId: string;
+    amount: number;
+    balanceAfter: number;
+    postingType: string;
+    sourceReference: string;
+    metadata: string;
+    createdAt: string;
+  }>;
+}
+
+export async function getPlayerAdmin(playerId: string, limit = 20): Promise<PlayerAdminResponse> {
+  await assertFastSchemaAdmin();
+  return nakamaRpc<PlayerAdminResponse>("reward_player_get_admin_v1", { playerId, limit });
+}
+
+export async function adjustPointsAdmin(playerId: string, amount: number, reason: string) {
+  await assertFastSchemaAdmin();
+  return nakamaRpc<{ contractVersion: string; success: boolean; newBalance: number; postingId: string }>(
+    "reward_points_adjust_admin_v1",
+    { playerId, amount, reason },
+  );
+}
+
+export interface RedemptionAdminRecord {
+  redemptionId: string;
+  playerId: string;
+  postingId: string;
+  itemId: string;
+  itemName: string;
+  pointsCost: number;
+  recipientName: string;
+  phone: string;
+  address: string;
+  note: string;
+  status: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface RedemptionsAdminResponse {
+  contractVersion: string;
+  total: number;
+  items: RedemptionAdminRecord[];
+}
+
+export async function listRedemptionsAdmin(status?: string, limit = 50, offset = 0): Promise<RedemptionsAdminResponse> {
+  await assertFastSchemaAdmin();
+  return nakamaRpc<RedemptionsAdminResponse>("reward_redemptions_admin_v1", { action: "list", status: status || undefined, limit, offset });
+}
+
+export async function updateRedemptionAdmin(redemptionId: string, newStatus: string, reason?: string, trackingCode?: string) {
+  await assertFastSchemaAdmin();
+  return nakamaRpc<{ contractVersion: string; success: boolean; redemptionId: string; status: string; pointsRefunded?: number }>(
+    "reward_redemptions_admin_v1",
+    { action: "update_status", redemptionId, newStatus, reason: reason || undefined, trackingCode: trackingCode || undefined },
+  );
+}
+
+export interface LeaderboardAdminResponse {
+  contractVersion: string;
+  topPoints: Array<{ username: string; score: number; rank: number; numScore: number; updatedAt: number }>;
+  topSpins: Array<{ username: string; score: number; rank: number; numScore: number; updatedAt: number }>;
+}
+
+export async function getLeaderboardAdmin(): Promise<LeaderboardAdminResponse> {
+  await assertFastSchemaAdmin();
+  return nakamaRpc<LeaderboardAdminResponse>("leaderboard_get_v1", {});
+}
