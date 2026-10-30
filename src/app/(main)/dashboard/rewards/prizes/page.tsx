@@ -3,7 +3,8 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Award, CheckCircle2, ChevronRight, Dices, Edit2, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Award, CheckCircle2, ChevronRight, Dices, Edit2, Loader2, Plus, RefreshCw, Sparkles, Trash2 } from "lucide-react";
+import { useAuthStore } from "@/stores/auth/auth-store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,18 +64,67 @@ export default function RewardPrizesPage() {
   const [formSortOrder, setFormSortOrder] = useState(1);
   const [savingPrize, setSavingPrize] = useState(false);
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = useAuthStore.getState().token;
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [tiersRes, prizesRes] = await Promise.all([
-        fetch("/api/content/reward_tier?limit=50"),
-        fetch("/api/content/reward_prize?limit=100"),
-      ]);
-      const tiersJson = await tiersRes.json();
-      const prizesJson = await prizesRes.json();
+      const token = useAuthStore.getState().token;
+      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
-      const fetchedTiers: RewardTier[] = tiersJson?.data?.items ?? tiersJson?.data ?? [];
-      const fetchedPrizes: RewardPrize[] = prizesJson?.data?.items ?? prizesJson?.data ?? [];
+      const [tiersRes, prizesRes] = await Promise.all([
+        fetch("/api/content/reward_tier?limit=50", { headers }),
+        fetch("/api/content/reward_prize?limit=100", { headers }),
+      ]);
+
+      const tiersJson = tiersRes.ok ? await tiersRes.json() : null;
+      const prizesJson = prizesRes.ok ? await prizesRes.json() : null;
+
+      let fetchedTiers: RewardTier[] = tiersJson?.data?.items ?? tiersJson?.data ?? [];
+      let fetchedPrizes: RewardPrize[] = prizesJson?.data?.items ?? prizesJson?.data ?? [];
+
+      // Fallback: nếu FastSchema rỗng hoặc 401, tự động lấy snapshot đang active từ Nakama runtime
+      if (fetchedTiers.length === 0) {
+        const currentRes = await fetch("/api/rewards/current");
+        if (currentRes.ok) {
+          const currentJson = await currentRes.json();
+          const nakamaTiers = currentJson?.active?.config?.spin?.tiers ?? [];
+          if (nakamaTiers.length > 0) {
+            fetchedTiers = nakamaTiers.map((t: any, idx: number) => ({
+              id: idx + 1,
+              tier_id: t.tierId,
+              tier_name: t.tierName || t.tierId,
+              cost_per_spin: t.costPerSpin || 100,
+              max_spins: t.maxSpins,
+              enabled: true,
+              sort_order: idx + 1,
+            }));
+            const allPrizes: RewardPrize[] = [];
+            let prizeCounter = 1;
+            for (const t of nakamaTiers) {
+              for (const p of t.prizes ?? []) {
+                allPrizes.push({
+                  id: prizeCounter++,
+                  tier_id: t.tierId,
+                  prize_id: p.id,
+                  name: p.name,
+                  points: p.points ?? 0,
+                  weight: p.weight ?? 0,
+                  enabled: true,
+                  sort_order: prizeCounter,
+                });
+              }
+            }
+            fetchedPrizes = allPrizes;
+          }
+        }
+      }
 
       setTiers(fetchedTiers);
       setPrizes(fetchedPrizes);
@@ -148,7 +198,7 @@ export default function RewardPrizesPage() {
       if (editingPrize) {
         const res = await fetch(`/api/content/reward_prize/${editingPrize.id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("Cập nhật thất bại");
@@ -156,7 +206,7 @@ export default function RewardPrizesPage() {
       } else {
         const res = await fetch(`/api/content/reward_prize`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("Tạo mới thất bại");
@@ -175,7 +225,10 @@ export default function RewardPrizesPage() {
   const handleDeletePrize = async (id: number) => {
     if (!confirm("Bạn có chắc chắn muốn xóa giải thưởng này?")) return;
     try {
-      const res = await fetch(`/api/content/reward_prize/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/content/reward_prize/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) throw new Error("Xóa thất bại");
       toast.success("Đã xóa giải thưởng");
       await fetchData();
@@ -216,6 +269,15 @@ export default function RewardPrizesPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            disabled={loading}
+            onClick={() => void fetchData()}
+            className="gap-1.5"
+          >
+            <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} />
+            Làm mới
+          </Button>
           <Button
             variant="default"
             disabled={publishPending}
