@@ -38,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
           const user = await api.getMe();
           // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
           document.cookie = `auth-token=${token}; path=/; max-age=86400`;
+          document.cookie = `token=${token}; path=/; max-age=86400`;
           set({ user, token, isLoading: false });
         } catch (err) {
           const message = err instanceof Error ? err.message : "Login failed";
@@ -50,6 +51,7 @@ export const useAuthStore = create<AuthState>()(
         api.setToken(null);
         // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
         document.cookie = "auth-token=; path=/; max-age=0";
+        document.cookie = "token=; path=/; max-age=0";
         set({ user: null, token: null });
       },
 
@@ -64,6 +66,7 @@ export const useAuthStore = create<AuthState>()(
             const user = await api.getMe();
             // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
             document.cookie = `auth-token=${defaultToken}; path=/; max-age=86400`;
+            document.cookie = `token=${defaultToken}; path=/; max-age=86400`;
             set({ user, token: defaultToken, isLoading: false });
           } catch {
             api.setToken(null);
@@ -74,6 +77,7 @@ export const useAuthStore = create<AuthState>()(
         api.setToken(token);
         // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
         document.cookie = `auth-token=${token}; path=/; max-age=86400`;
+        document.cookie = `token=${token}; path=/; max-age=86400`;
         set({ isLoading: true });
         try {
           const user = await api.getMe();
@@ -82,6 +86,7 @@ export const useAuthStore = create<AuthState>()(
           api.setToken(null);
           // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
           document.cookie = "auth-token=; path=/; max-age=0";
+          document.cookie = "token=; path=/; max-age=0";
           set({ user: null, token: null, isLoading: false });
         }
       },
