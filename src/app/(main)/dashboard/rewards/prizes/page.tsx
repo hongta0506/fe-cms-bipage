@@ -73,8 +73,8 @@ export default function RewardPrizesPage() {
       const tiersJson = await tiersRes.json();
       const prizesJson = await prizesRes.json();
 
-      const fetchedTiers: RewardTier[] = tiersJson?.data ?? [];
-      const fetchedPrizes: RewardPrize[] = prizesJson?.data ?? [];
+      const fetchedTiers: RewardTier[] = tiersJson?.data?.items ?? tiersJson?.data ?? [];
+      const fetchedPrizes: RewardPrize[] = prizesJson?.data?.items ?? prizesJson?.data ?? [];
 
       setTiers(fetchedTiers);
       setPrizes(fetchedPrizes);
