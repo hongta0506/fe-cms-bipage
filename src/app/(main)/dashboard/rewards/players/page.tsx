@@ -55,9 +55,24 @@ interface PlayerDetail {
     balanceAfter: number;
     postingType: string;
     sourceReference: string;
-    metadata: string;
+    metadata: any;
     createdAt: string;
   }>;
+}
+
+function formatMetadata(metadata: any, fallback: string): string {
+  if (!metadata) return fallback || "—";
+  if (typeof metadata === "string") return metadata;
+  if (typeof metadata === "object") {
+    if (metadata.reason) return String(metadata.reason);
+    if (metadata.prizeName) return `${metadata.prizeName}${metadata.tierId ? ` (${metadata.tierId})` : ""}`;
+    try {
+      return JSON.stringify(metadata);
+    } catch {
+      return fallback || "—";
+    }
+  }
+  return String(metadata);
 }
 
 export default function PlayersRewardPage() {
@@ -350,7 +365,7 @@ export default function PlayersRewardPage() {
                                   {entry.balanceAfter.toLocaleString()}
                                 </TableCell>
                                 <TableCell className="text-xs max-w-xs truncate text-muted-foreground font-mono">
-                                  {entry.metadata || entry.sourceReference}
+                                  {formatMetadata(entry.metadata, entry.sourceReference)}
                                 </TableCell>
                               </TableRow>
                             );
