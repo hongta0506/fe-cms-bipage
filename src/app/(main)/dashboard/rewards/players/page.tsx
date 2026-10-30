@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
   ChevronRight,
-  CreditCard,
+  Coins,
   History,
   Loader2,
   RefreshCw,
@@ -32,16 +32,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-interface UserItem {
-  id: number;
-  username?: string;
-  email?: string;
-  created_at?: string;
+interface PlayerItem {
+  id: string;
+  username: string;
+  email: string;
+  balance: number;
+  version: number;
+  createTime: number;
 }
 
 interface PlayerDetail {
   contractVersion: string;
   playerId: string;
+  username?: string;
+  email?: string;
   balance: number;
   version: number;
   referralCode: string;
@@ -57,11 +61,12 @@ interface PlayerDetail {
 }
 
 export default function PlayersRewardPage() {
-  const [users, setUsers] = useState<UserItem[]>([]);
+  const [players, setPlayers] = useState<PlayerItem[]>([]);
+  const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
-  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadingPlayers, setLoadingPlayers] = useState(true);
 
-  const [selectedUser, setSelectedUser] = useState<UserItem | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerItem | null>(null);
   const [playerDetail, setPlayerDetail] = useState<PlayerDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
@@ -71,38 +76,40 @@ export default function PlayersRewardPage() {
   const [adjustReason, setAdjustReason] = useState("");
   const [adjustPending, setAdjustPending] = useState(false);
 
-  const fetchUsers = async (query = "") => {
+  const fetchPlayers = async (query = "") => {
     try {
-      setLoadingUsers(true);
+      setLoadingPlayers(true);
       const url = query
-        ? `/api/content/user?limit=20&search=${encodeURIComponent(query)}`
-        : `/api/content/user?limit=20`;
+        ? `/api/rewards/players?query=${encodeURIComponent(query)}&limit=50`
+        : `/api/rewards/players?limit=50`;
       const res = await fetch(url);
       const json = await res.json();
-      const list = json?.data ?? [];
-      setUsers(list);
-      if (list.length > 0 && !selectedUser) {
-        void handleSelectUser(list[0]);
+      if (!res.ok) throw new Error(json.error || "Không thể tải danh sách");
+      const list = json?.players ?? [];
+      setPlayers(list);
+      setTotal(json?.total ?? 0);
+      if (list.length > 0 && !selectedPlayer) {
+        void handleSelectPlayer(list[0]);
       }
     } catch {
-      toast.error("Không thể tải danh sách người chơi");
+      toast.error("Không thể tải danh sách người chơi từ Nakama");
     } finally {
-      setLoadingUsers(false);
+      setLoadingPlayers(false);
     }
   };
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      void fetchUsers(search);
+      void fetchPlayers(search);
     }, 300);
     return () => clearTimeout(handler);
   }, [search]);
 
-  const handleSelectUser = async (user: UserItem) => {
-    setSelectedUser(user);
+  const handleSelectPlayer = async (p: PlayerItem) => {
+    setSelectedPlayer(p);
     try {
       setLoadingDetail(true);
-      const res = await fetch(`/api/rewards/players/${user.id}`);
+      const res = await fetch(`/api/rewards/players/${p.id}`);
       if (!res.ok) {
         setPlayerDetail(null);
         return;
@@ -118,7 +125,7 @@ export default function PlayersRewardPage() {
 
   const handleAdjustSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUser) return;
+    if (!selectedPlayer) return;
     if (adjustAmount === 0) {
       toast.error("Số điểm điều chỉnh không thể bằng 0");
       return;
@@ -130,7 +137,7 @@ export default function PlayersRewardPage() {
 
     try {
       setAdjustPending(true);
-      const res = await fetch(`/api/rewards/players/${selectedUser.id}/adjust`, {
+      const res = await fetch(`/api/rewards/players/${selectedPlayer.id}/adjust`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: Number(adjustAmount), reason: adjustReason.trim() }),
@@ -141,8 +148,9 @@ export default function PlayersRewardPage() {
       toast.success(`Điều chỉnh điểm thành công! Số dư mới: ${json.newBalance} pts`);
       setIsAdjustOpen(false);
       setAdjustReason("");
-      // Refresh detail
-      await handleSelectUser(selectedUser);
+      // Refresh list & detail
+      await handleSelectPlayer(selectedPlayer);
+      await fetchPlayers(search);
     } catch (err: any) {
       toast.error(err.message || "Lỗi xử lý");
     } finally {
@@ -168,19 +176,19 @@ export default function PlayersRewardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: User Search & List */}
+        {/* Left: Player Search & List */}
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center justify-between">
-              <span>Danh sách Người chơi</span>
-              <Button size="icon" variant="ghost" className="size-7" onClick={() => void fetchUsers(search)}>
+              <span>Người chơi ({total})</span>
+              <Button size="icon" variant="ghost" className="size-7" onClick={() => void fetchPlayers(search)}>
                 <RefreshCw className="size-3.5" />
               </Button>
             </CardTitle>
             <div className="relative mt-2">
               <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Tìm username / email..."
+                placeholder="Tìm username / email / UUID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8 text-sm"
@@ -188,21 +196,21 @@ export default function PlayersRewardPage() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            {loadingUsers ? (
+            {loadingPlayers ? (
               <div className="flex items-center justify-center p-8">
                 <Loader2 className="size-5 animate-spin text-muted-foreground" />
               </div>
-            ) : users.length === 0 ? (
+            ) : players.length === 0 ? (
               <div className="text-center p-6 text-sm text-muted-foreground">Không tìm thấy người chơi</div>
             ) : (
               <div className="divide-y max-h-[600px] overflow-y-auto">
-                {users.map((u) => {
-                  const isSelected = selectedUser?.id === u.id;
+                {players.map((p) => {
+                  const isSelected = selectedPlayer?.id === p.id;
                   return (
                     <button
-                      key={u.id}
+                      key={p.id}
                       type="button"
-                      onClick={() => void handleSelectUser(u)}
+                      onClick={() => void handleSelectPlayer(p)}
                       className={`w-full text-left p-3.5 transition-colors flex items-center justify-between hover:bg-muted/50 ${
                         isSelected ? "bg-muted font-medium" : ""
                       }`}
@@ -212,11 +220,16 @@ export default function PlayersRewardPage() {
                           <User className="size-4" />
                         </div>
                         <div className="truncate">
-                          <div className="text-sm font-medium truncate">{u.username || `User #${u.id}`}</div>
-                          <div className="text-xs text-muted-foreground truncate">{u.email || "No email"}</div>
+                          <div className="text-sm font-medium truncate">{p.username || "Anonymous"}</div>
+                          <div className="text-xs text-muted-foreground truncate font-mono">{p.id.slice(0, 8)}...</div>
                         </div>
                       </div>
-                      <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+                      <div className="text-right shrink-0">
+                        <div className="text-sm font-bold font-mono text-amber-600 dark:text-amber-400">
+                          {p.balance.toLocaleString()} pts
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">v{p.version}</div>
+                      </div>
                     </button>
                   );
                 })}
@@ -227,19 +240,19 @@ export default function PlayersRewardPage() {
 
         {/* Right: Selected Player Detail & Nakama Ledger */}
         <div className="lg:col-span-2 space-y-6">
-          {selectedUser ? (
+          {selectedPlayer ? (
             <>
               {/* Profile Overview Card */}
               <Card>
                 <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
                   <div>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <span>{selectedUser.username || `User #${selectedUser.id}`}</span>
+                      <span>{selectedPlayer.username || "Anonymous"}</span>
                       <Badge variant="outline" className="font-mono text-xs">
-                        ID: {selectedUser.id}
+                        UUID: {selectedPlayer.id}
                       </Badge>
                     </CardTitle>
-                    <CardDescription>{selectedUser.email}</CardDescription>
+                    <CardDescription>{selectedPlayer.email || "Không có email"}</CardDescription>
                   </div>
                   <Button onClick={() => setIsAdjustOpen(true)} className="gap-2">
                     <Sliders className="size-4" />
@@ -254,7 +267,7 @@ export default function PlayersRewardPage() {
                         {loadingDetail ? (
                           <Loader2 className="size-5 animate-spin" />
                         ) : (
-                          `${playerDetail?.balance?.toLocaleString() ?? 0} pts`
+                          `${playerDetail?.balance?.toLocaleString() ?? selectedPlayer.balance.toLocaleString()} pts`
                         )}
                       </div>
                     </div>
@@ -269,7 +282,7 @@ export default function PlayersRewardPage() {
                     <div className="p-3 bg-muted/40 rounded-lg border">
                       <div className="text-xs text-muted-foreground">Account Ledger Version</div>
                       <div className="text-lg font-mono font-semibold mt-1">
-                        {loadingDetail ? "..." : `v${playerDetail?.version ?? 0}`}
+                        {loadingDetail ? "..." : `v${playerDetail?.version ?? selectedPlayer.version}`}
                       </div>
                     </div>
                   </div>
@@ -367,7 +380,7 @@ export default function PlayersRewardPage() {
             <DialogHeader>
               <DialogTitle>Điều chỉnh điểm người chơi</DialogTitle>
               <DialogDescription>
-                Thực hiện cộng hoặc trừ điểm trực tiếp trên Nakama cho <strong>{selectedUser?.username}</strong>.
+                Thực hiện cộng hoặc trừ điểm trực tiếp trên Nakama cho <strong>{selectedPlayer?.username}</strong>.
               </DialogDescription>
             </DialogHeader>
 

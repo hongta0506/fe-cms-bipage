@@ -166,9 +166,35 @@ export async function listSpinsAdmin(limit = 50, offset = 0, playerId?: string):
   return nakamaRpc<SpinsListResponse>("reward_spins_list_admin_v1", { limit, offset, playerId: playerId || undefined });
 }
 
+export interface AdminPlayerItem {
+  id: string;
+  username: string;
+  email: string;
+  balance: number;
+  version: number;
+  createTime: number;
+}
+
+export interface PlayersListResponse {
+  contractVersion: string;
+  total: number;
+  players: AdminPlayerItem[];
+}
+
+export async function listPlayersAdmin(query = "", limit = 50, offset = 0): Promise<PlayersListResponse> {
+  await assertFastSchemaAdmin();
+  return nakamaRpc<PlayersListResponse>("reward_players_list_admin_v1", {
+    query: query || undefined,
+    limit,
+    offset,
+  });
+}
+
 export interface PlayerAdminResponse {
   contractVersion: string;
   playerId: string;
+  username?: string;
+  email?: string;
   balance: number;
   version: number;
   referralCode: string;
