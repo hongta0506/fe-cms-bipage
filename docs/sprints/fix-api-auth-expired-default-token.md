@@ -35,6 +35,11 @@ rendered real data (prizes 8 rows, players 5, spins 30, leaderboards 9).
 
 ## 2. Root cause
 
+Two independent faults compound here. The first attempt at this fix only addressed the first one
+and the browser check still showed `401`, which is what exposed the second.
+
+### 2.1 The client booted with an expired hardcoded JWT
+
 The FastSchema client in `src/lib/api.ts` starts life holding a **hardcoded JWT**:
 
 ```ts
@@ -71,12 +76,33 @@ document.cookie = `token=${defaultToken}; ...`;
 
 So a reload can actively overwrite a valid session cookie with an expired token.
 
+### 2.2 FastSchema accepts the bearer header only — never the cookie
+
+Fixing 2.1 alone was not enough: the browser check after deploy still showed `401`. Probing the
+deployed staging host with a **freshly minted** token exposes why:
+
+```
+GET /api/auth/me
+  Authorization: Bearer <fresh token>   -> 200  {"data":{"id":1,"username":"admin",...}}
+  Cookie: token=<fresh token>           -> 401  {"error":{"code":"401","message":"Unauthorized"}}
+  no credentials                        -> 401
+```
+
+Same for `/api/schema` and `/api/content/domains?limit=100` (both `200` with the header).
+
+So the session cookie alone never authenticates a FastSchema call on these deployments — the caller
+must convert it into an `Authorization: Bearer` header. Once 2.1 was fixed, the client had
+`token === null` in production, so anything firing **before** `auth-store.initialize()` resolved —
+the shell's `/api/auth/me` probe, the sidebar `/api/schema` load, the domain switcher's
+`/api/content/domains` — sent **no credentials at all**, producing exactly the same `401`.
+The fix traded an expired token for no token, and the symptom did not move.
+
 ## 3. Fix
 
 Scope: two files, no API or UI contract changes.
 
-**`src/lib/api.ts`** — keep the convenience token for local development only; in any other
-environment start with no token so the client never sends a stale one:
+**`src/lib/api.ts`** — three parts: keep the convenience token for local development only, read the
+session cookie lazily, and fall back to it whenever no token has been set explicitly:
 
 ```ts
 const DEFAULT_TOKEN =
@@ -84,12 +110,27 @@ const DEFAULT_TOKEN =
     ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     : null;
 
+function readTokenCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  return document.cookie.match(/(?:^|;\s*)token=([^;]+)/)?.[1] ?? null;
+}
+
 class ApiClient {
   private token: string | null = DEFAULT_TOKEN;
+
+  private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const headers: Record<string, string> = { "Content-Type": "application/json", ... };
+    const token = this.token ?? readTokenCookie();   // ← ordering-proof
+    if (token) headers.Authorization = `Bearer ${token}`;
 ```
 
+Reading the cookie inside `request()` rather than in the constructor is what makes this robust: it
+is evaluated per call, so a token written by `login()` is used immediately, and no caller depends on
+`initialize()` having run first. The `typeof document` guard keeps the module safe to import from
+server code, where the fallback degrades to "no token".
+
 **`src/stores/auth/auth-store.ts`** — delete the duplicated literal and bootstrap from the session
-cookie instead, which is what the middleware already trusts:
+cookie instead:
 
 ```ts
 initialize: async () => {
@@ -100,7 +141,8 @@ initialize: async () => {
       : null;
   const effective = token ?? cookieToken;
   if (!effective) {
-    set({ isLoading: false });
+    api.setToken(null);
+    set({ user: null, token: null, isLoading: false });
     return;
   }
   api.setToken(effective);
@@ -109,7 +151,7 @@ initialize: async () => {
   set({ isLoading: true });
   try {
     const user = await api.getMe();
-    set({ user, isLoading: false });
+    set({ user, token: effective, isLoading: false });
   } catch {
     api.setToken(null);
     document.cookie = "auth-token=; path=/; max-age=0";
@@ -121,8 +163,10 @@ initialize: async () => {
 
 Behaviour changes, stated explicitly:
 
-- Production no longer ever sends an unauthenticated hardcoded bearer token.
-- A visitor with no Zustand token and no cookie now ends up unauthenticated (`isLoading: false`,
+- Production no longer ever sends an expired hardcoded bearer token.
+- Every FastSchema call now carries a bearer header whenever a session cookie exists, regardless of
+  which component fired first.
+- A visitor with no Zustand token and no cookie ends up unauthenticated (`isLoading: false`,
   `user: null`) and is redirected to login by the existing middleware — previously they got a
   guaranteed-401 "logged in" shell.
 - Development keeps the existing convenience token.
@@ -130,9 +174,9 @@ Behaviour changes, stated explicitly:
 
 ## 4. Verification checklist
 
-- [ ] `npx tsc --noEmit` exits 0
-- [ ] `npx next build` exits 0
-- [ ] Deploy to staging and production
+- [x] `npx tsc --noEmit` exits 0
+- [x] `npx next build` exits 0
+- [x] Deploy to staging and production
 - [ ] Real browser (puppeteer-core): login via form, then `/api/auth/me` returns 200
 - [ ] Real browser: no `401` on `/api/schema` or `/api/content/domains` for either environment
 - [ ] Reward pages still render their tables (prizes 8, players 5, spins 30, leaderboards 9 on staging)
