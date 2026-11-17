@@ -1,8 +1,13 @@
 const API_BASE = process.env.NEXT_PUBLIC_FASTSCHEMA_URL || "https://api.bipage.net";
 
-// Default token for development (avoids login screen on load)
+// Convenience token for local development only (avoids the login screen on load).
+// It is deliberately scoped to development: outside development the client must start
+// with no token, otherwise it sends an expired hardcoded JWT and every FastSchema call
+// answers 401 — which is what broke /api/auth/me, /api/schema and /api/content/domains.
 const DEFAULT_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODI2MjA1OTEsInVzZXIiOnsiaWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGZhc3RzY2hlbWEuY29tIiwiYWN0aXZlIjp0cnVlLCJwcm92aWRlciI6ImxvY2FsIiwicm9sZV9pZHMiOlsxXX19.HR_wivFwx75pZuFQjWUgNAqr0ph0IhXrnppVXu3a4is";
+  process.env.NODE_ENV === "development"
+    ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODI2MjA1OTEsInVzZXIiOnsiaWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGZhc3RzY2hlbWEuY29tIiwiYWN0aXZlIjp0cnVlLCJwcm92aWRlciI6ImxvY2FsIiwicm9sZV9pZHMiOlsxXX19.HR_wivFwx75pZuFQjWUgNAqr0ph0IhXrnppVXu3a4is"
+    : null;
 
 interface ApiResponse<T = unknown> {
   data?: T;
