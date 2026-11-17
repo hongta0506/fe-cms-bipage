@@ -14,6 +14,17 @@ interface ApiResponse<T = unknown> {
   error?: { code: string; message: string };
 }
 
+// FastSchema on the deployed hosts accepts the bearer header ONLY — it answers 401 for the
+// `token` cookie alone. Callers therefore have to turn the session cookie into an
+// Authorization header, otherwise anything that fires before auth-store.initialize()
+// resolves (sidebar schema, domain switcher, the shell's /api/auth/me probe) sends no
+// credentials at all and 401s. Read the cookie lazily so a token set after login is picked
+// up without waiting for module re-evaluation.
+function readTokenCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  return document.cookie.match(/(?:^|;\s*)token=([^;]+)/)?.[1] ?? null;
+}
+
 class ApiClient {
   private token: string | null = DEFAULT_TOKEN;
 
@@ -27,8 +38,9 @@ class ApiClient {
       ...((options.headers as Record<string, string>) || {}),
     };
 
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+    const token = this.token ?? readTokenCookie();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
 
     const res = await fetch(`${API_BASE}${path}`, {
