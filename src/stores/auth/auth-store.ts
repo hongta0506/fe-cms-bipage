@@ -57,31 +57,29 @@ export const useAuthStore = create<AuthState>()(
 
       initialize: async () => {
         const { token } = get();
-        // No token in Zustand but DEFAULT_TOKEN exists in api client — sync it
-        if (!token) {
-          const defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODI2MjA1OTEsInVzZXIiOnsiaWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGZhc3RzY2hlbWEuY29tIiwiYWN0aXZlIjp0cnVlLCJwcm92aWRlciI6ImxvY2FsIiwicm9sZV9pZHMiOlsxXX19.HR_wivFwx75pZuFQjWUgNAqr0ph0IhXrnppVXu3a4is";
-          api.setToken(defaultToken);
-          set({ isLoading: true });
-          try {
-            const user = await api.getMe();
-            // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
-            document.cookie = `auth-token=${defaultToken}; path=/; max-age=86400`;
-            document.cookie = `token=${defaultToken}; path=/; max-age=86400`;
-            set({ user, token: defaultToken, isLoading: false });
-          } catch {
-            api.setToken(null);
-            set({ isLoading: false });
-          }
+        // Never fall back to a hardcoded token here: the previous default was an expired
+        // JWT, and re-applying it made /api/auth/me, /api/schema and /api/content/domains
+        // answer 401 while also overwriting a valid session cookie. Bootstrap from the
+        // cookie the middleware already trusts instead.
+        // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
+        const cookieToken =
+          typeof document !== "undefined"
+            ? (document.cookie.match(/(?:^|;\s*)token=([^;]+)/)?.[1] ?? null)
+            : null;
+        const effectiveToken = token ?? cookieToken;
+        if (!effectiveToken) {
+          api.setToken(null);
+          set({ user: null, token: null, isLoading: false });
           return;
         }
-        api.setToken(token);
+        api.setToken(effectiveToken);
         // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
-        document.cookie = `auth-token=${token}; path=/; max-age=86400`;
-        document.cookie = `token=${token}; path=/; max-age=86400`;
+        document.cookie = `auth-token=${effectiveToken}; path=/; max-age=86400`;
+        document.cookie = `token=${effectiveToken}; path=/; max-age=86400`;
         set({ isLoading: true });
         try {
           const user = await api.getMe();
-          set({ user, isLoading: false });
+          set({ user, token: effectiveToken, isLoading: false });
         } catch {
           api.setToken(null);
           // biome-ignore lint/suspicious/noDocumentCookie: auth cookie is required for middleware authentication
