@@ -177,7 +177,38 @@ Behaviour changes, stated explicitly:
 - [x] `npx tsc --noEmit` exits 0
 - [x] `npx next build` exits 0
 - [x] Deploy to staging and production
-- [ ] Real browser (puppeteer-core): login via form, then `/api/auth/me` returns 200
-- [ ] Real browser: no `401` on `/api/schema` or `/api/content/domains` for either environment
-- [ ] Reward pages still render their tables (prizes 8, players 5, spins 30, leaderboards 9 on staging)
-- [ ] Logged-out visit still redirects to `/auth/v1/login`
+- [x] Real browser (puppeteer-core): login via form, then `/api/auth/me` returns 200
+- [x] Real browser: no `401` on `/api/schema` or `/api/content/domains` for either environment
+- [x] Reward pages still render their tables (prizes 8, players 5, spins 30, leaderboards 9 on staging)
+- [x] Logged-out visit still redirects to `/auth/v1/login`
+
+### 4.1 Verification evidence (2026-11-17, after PR #23)
+
+Deployed commit `c83c4b7` to both environments (`admin-cms` :3005, `admin-cms-staging` :3015),
+builds exit 0, pm2 online. Real Chrome 155 driven by puppeteer-core, login through the actual form:
+
+| Probe (from page context, cookie turned into a Bearer header) | Staging | Production |
+|---|---|---|
+| `GET /api/auth/me` | 200 | 200 |
+| `GET /api/schema` | 200 | 200 |
+| `GET /api/content/domains?limit=100` | 200 | 200 |
+| `GET /api/auth/me` with cookie only (baseline) | 401 | 401 |
+
+The cookie-only baseline staying `401` is the point: it proves the backend accepts the bearer header
+and nothing else, so the header conversion in `ApiClient.request()` is what fixed this — not the
+removal of the expired literal alone.
+
+Zero `4xx` responses on any of the six reward pages, both environments (previously every page logged
+`401 /api/schema` and `401 /api/content/domains`):
+
+| Page | Staging rows | Production rows |
+|---|---|---|
+| `prizes` | 8 | 8 |
+| `players` | 5 | 0 |
+| `spins` | 30 | 0 |
+| `claims` | 0 | 0 |
+| `leaderboards` | 9 | 0 |
+| `publish` | 0 | 0 |
+
+Production is empty apart from prize config because its `reward_production` database is fresh after
+the Nakama cluster split. Staging row counts match the pre-fix run, so no regression.
